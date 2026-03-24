@@ -2,11 +2,12 @@ package org.blackducks.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
+import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,11 +30,11 @@ public class JwtService {
 
     public String generateToken(Map<String, Object> extraClaims, String matricula) {
         return Jwts.builder()
-                .claims(extraClaims)
-                .subject(matricula)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24 horas
-                .signWith(getSignInKey(), Jwts.SIG.HS256)
+                .setClaims(extraClaims) // Adaptado a v0.11.x
+                .setSubject(matricula)  // Adaptado a v0.11.x
+                .setIssuedAt(new Date(System.currentTimeMillis())) // Adaptado a v0.11.x
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24 horas
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256) // Adaptado a v0.11.x
                 .compact();
     }
 
@@ -56,14 +57,14 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getSignInKey())
+        return Jwts.parserBuilder() // Adaptado a v0.11.x
+                .setSigningKey(getSignInKey())
                 .build()
-                .parseSignedClaims(token)
-                .getPayload();
+                .parseClaimsJws(token) // Adaptado a v0.11.x
+                .getBody();
     }
 
-    private SecretKey getSignInKey() {
+    private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
