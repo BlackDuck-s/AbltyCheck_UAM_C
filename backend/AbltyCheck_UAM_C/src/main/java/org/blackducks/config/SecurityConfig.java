@@ -38,7 +38,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 // Configuramos las rutas públicas y privadas
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll() // Login y registro son públicos
+                        .requestMatchers("/api/v1/auth/**").permitAll()// Login y registro son públicos
+                        .requestMatchers("/api/v1/auth/**").hasRole("ADMIN")
                         .anyRequest().authenticated() // Todo lo demás requiere token
                 )
                 // Las sesiones serán sin estado (Stateless)
@@ -47,7 +48,7 @@ public class SecurityConfig {
                 // Le decimos a Spring que nuestro proveedor de usuarios es CustomUserDetailsService
                  http.userDetailsService(userDetailsService);
 
-                 // Insertamos nuestro filtro antes del filtro por defecto de Spring
+                 // Insertamos el filtro antes que el de Spring
                 http.addFilterBefore(jwtAuthFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -61,7 +62,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Puerto por defecto de Vite
+        // Puerto para conectar con VITE
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
