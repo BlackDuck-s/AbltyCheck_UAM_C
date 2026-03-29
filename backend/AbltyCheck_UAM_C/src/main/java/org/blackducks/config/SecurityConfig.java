@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 // Configuramos las rutas públicas y privadas
                 .authorizeHttpRequests(auth -> auth
+
                         .requestMatchers("/api/v1/auth/**").permitAll()// Login y registro son públicos
                         .requestMatchers("/api/v1/auth/**").hasRole("ADMIN")
                         .anyRequest().authenticated() // Todo lo demás requiere token
