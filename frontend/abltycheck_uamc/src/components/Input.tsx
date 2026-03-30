@@ -5,8 +5,8 @@ interface InputProps {
   type?: 'text' | 'password' | 'number';
   placeholder: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; // Tipo especial de TS para inputs
-  error?: string; // Por si queremos mostrar un mensaje de validación
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  error?: string;
 }
 
 export const Input: React.FC<InputProps> = ({ 

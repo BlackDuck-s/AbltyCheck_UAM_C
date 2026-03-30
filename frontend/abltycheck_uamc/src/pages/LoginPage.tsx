@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-// Definición de las propiedades que recibe el componente [cite: 26]
 interface LoginProps {
   alEntrar: (rol: 'ALUMNO' | 'ADMIN') => void;
   alIrARegistro: () => void;
@@ -13,7 +12,7 @@ export const LoginPage: React.FC<LoginProps> = ({ alEntrar, alIrARegistro }) => 
   return (
     <div style={containerStyle}>
       
-      {/* SECCIÓN IZQUIERDA: Panel Informativo (Brand Panel) */}
+      {}
       <div style={panelIzquierdoStyle}>
         <div style={logoWrapperStyle}>A</div>
         <h1 style={{ fontSize: '3rem', marginBottom: '10px', fontWeight: 'bold' }}>AbltyCheck</h1>
@@ -27,7 +26,7 @@ export const LoginPage: React.FC<LoginProps> = ({ alEntrar, alIrARegistro }) => 
         </div>
       </div>
 
-      {/* SECCIÓN DERECHA: Formulario de Acceso [cite: 35] */}
+      {}
       <div style={panelDerechoStyle}>
         <div style={{ width: '100%', maxWidth: '400px' }}>
           <h2 style={{ color: '#1a1a1a', fontSize: '2.2rem', marginBottom: '10px' }}>¡Bienvenido de vuelta!</h2>
@@ -55,7 +54,7 @@ export const LoginPage: React.FC<LoginProps> = ({ alEntrar, alIrARegistro }) => 
             />
           </div>
 
-          {/* BOTONES DE ACCESO SEGÚN ROL  */}
+          {}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <button 
               onClick={() => alEntrar('ALUMNO')} 
@@ -85,7 +84,6 @@ export const LoginPage: React.FC<LoginProps> = ({ alEntrar, alIrARegistro }) => 
   );
 };
 
-// --- OBJETOS DE ESTILO (CSS-in-JS) ---
 
 const containerStyle: React.CSSProperties = {
   display: 'flex',

@@ -12,12 +12,12 @@ export const RegisterPage: React.FC<RegisterProps> = ({ alFinalizar, alIrALogin 
     e.preventDefault();
     console.log("Enviando a Firebase Admin SDK:", datos);
     alert("¡Cuenta creada con éxito! Ahora puedes iniciar sesión.");
-    alFinalizar(); // Nos regresa al Login
+    alFinalizar();
   };
 
   return (
     <div style={containerStyle}>
-      {/* LADO IZQUIERDO: Panel Informativo (Morado) */}
+      {}
       <div style={panelIzquierdoStyle}>
         <div style={logoStyle}>A</div>
         <h1 style={{ fontSize: '2.5rem', marginBottom: '15px' }}>Únete a AbltyCheck</h1>
@@ -26,7 +26,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({ alFinalizar, alIrALogin 
         </p>
       </div>
 
-      {/* LADO DERECHO: Formulario de Registro */}
+      {}
       <div style={panelDerechoStyle}>
         <div style={{ width: '100%', maxWidth: '400px' }}>
           <h2 style={{ color: '#1a1a1a', fontSize: '1.8rem', marginBottom: '10px' }}>Crear nueva cuenta</h2>
@@ -80,7 +80,6 @@ export const RegisterPage: React.FC<RegisterProps> = ({ alFinalizar, alIrALogin 
   );
 };
 
-// ESTILOS (Manteniendo la coherencia visual)
 const containerStyle: React.CSSProperties = { display: 'flex', height: '100vh', width: '100vw', position: 'fixed', top: 0, left: 0, fontFamily: 'sans-serif' };
 const panelIzquierdoStyle: React.CSSProperties = { flex: 1, background: 'linear-gradient(135deg, #7d5fff 0%, #a88beb 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white', padding: '40px', textAlign: 'center' };
 const panelDerechoStyle: React.CSSProperties = { flex: 1, backgroundColor: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '60px' };

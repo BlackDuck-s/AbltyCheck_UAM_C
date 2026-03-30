@@ -1,10 +1,9 @@
 import React from 'react';
-// src/components/Button.tsx
 interface ButtonProps {
   label: string;
   onClick: () => void;
   disabled?: boolean;
-  variant?: 'primary' | 'secondary'; // Agrega esta línea
+  variant?: 'primary' | 'secondary';
 }
 
 export const Button: React.FC<ButtonProps> = ({ label, onClick, disabled, variant }) => {
@@ -16,7 +15,7 @@ export const Button: React.FC<ButtonProps> = ({ label, onClick, disabled, varian
       disabled={disabled}
       style={{
         padding: '10px 20px',
-        backgroundColor: esSecundario ? '#6c757d' : '#007bff', // Gris si es secundario
+        backgroundColor: esSecundario ? '#6c757d' : '#007bff',
         color: 'white',
         border: 'none',
         borderRadius: '5px',

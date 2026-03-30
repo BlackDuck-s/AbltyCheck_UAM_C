@@ -4,29 +4,19 @@ import { RegisterPage } from './pages/RegisterPage';
 import { ReactivoForm } from './pages/ReactivoForm';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { EntrenamientoPage } from './pages/EntrenamientoPage';
+import { PracticarPage } from './pages/PracticarPage';
 
 function App() {
-  // --- ESTADOS DE FLUJO ---
-  // rol: ALUMNO o ADMIN (Simula la decodificación del JWT que configuró Max)
   const [rol, setRol] = useState<'ALUMNO' | 'ADMIN' | null>(null);
-  
-  // vistaAuth: Controla si estamos en Login o Registro
   const [vistaAuth, setVistaAuth] = useState<'LOGIN' | 'REGISTER'>('LOGIN');
-  
-  // vista: Controla la sección activa dentro del Dashboard
-  const [vista, setVista] = useState<'FORM' | 'ADMIN' | 'EXAMEN'>('EXAMEN');
-  
-  // sidebarAbierta: Maneja el estado del menú lateral "escondible"
+  const [vista, setVista] = useState<'EXAMEN' | 'PRACTICAR' | 'FORM' | 'ADMIN'>('EXAMEN');
   const [sidebarAbierta, setSidebarAbierta] = useState(true);
 
-  // --- FUNCIONES DE NAVEGACIÓN ---
   const manejarLogin = (nuevoRol: 'ALUMNO' | 'ADMIN') => {
     setRol(nuevoRol);
-    // Redirección automática: Admin va a su panel, Alumno a entrenar
     setVista(nuevoRol === 'ADMIN' ? 'ADMIN' : 'EXAMEN');
   };
 
-  // --- RENDERIZADO CONDICIONAL (FLUJO DE AUTENTICACIÓN) ---
   if (!rol) {
     return vistaAuth === 'LOGIN' ? (
       <LoginPage 
@@ -41,11 +31,10 @@ function App() {
     );
   }
 
-  // --- RENDERIZADO DEL DASHBOARD PRINCIPAL (POST-LOGIN) ---
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f4f7f6', fontFamily: 'sans-serif' }}>
       
-      {/* SIDEBAR IZQUIERDA (Menú que se esconde) */}
+      {}
       <aside style={{
         width: sidebarAbierta ? '260px' : '80px',
         backgroundColor: '#7d5fff',
@@ -54,11 +43,11 @@ function App() {
         display: 'flex',
         flexDirection: 'column',
         padding: '20px 10px',
-        boxShadow: '4px 0 10px rgba(0,0,0,0.1)',
+        boxShadow: '4px 0 15px rgba(0,0,0,0.1)',
         position: 'relative',
-        zIndex: 10
+        zIndex: 100
       }}>
-        {/* Botón Toggle para esconder/mostrar la barra */}
+        {}
         <button 
           onClick={() => setSidebarAbierta(!sidebarAbierta)}
           style={toggleBtnStyle}
@@ -70,24 +59,28 @@ function App() {
           {sidebarAbierta ? 'AbltyCheck' : 'A'}
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
           <button onClick={() => setVista('EXAMEN')} style={sideBtnStyle(vista === 'EXAMEN', sidebarAbierta)}>
-            {sidebarAbierta ? '📝 Entrenamiento' : '📝'}
+             {sidebarAbierta ? '🏠 Mi Panel' : '🏠'}
+          </button>
+
+          <button onClick={() => setVista('PRACTICAR')} style={sideBtnStyle(vista === 'PRACTICAR', sidebarAbierta)}>
+             {sidebarAbierta ? '📖 Practicar' : '📖'}
           </button>
           
           <button onClick={() => setVista('FORM')} style={sideBtnStyle(vista === 'FORM', sidebarAbierta)}>
-            {sidebarAbierta ? '➕ Crowdsourcing' : '➕'}
+             {sidebarAbierta ? '➕ Crowdsourcing' : '➕'}
           </button>
           
-          {/* PROTECCIÓN DE RUTAS: Solo el rol ADMIN ve esta opción */}
+          {}
           {rol === 'ADMIN' && (
             <button onClick={() => setVista('ADMIN')} style={sideBtnStyle(vista === 'ADMIN', sidebarAbierta)}>
-              {sidebarAbierta ? '🛡️ Panel Admin' : '🛡️'}
+               {sidebarAbierta ? '🛡️ Panel Admin' : '🛡️'}
             </button>
           )}
         </nav>
 
-        {/* Botón de Salida */}
+        {}
         <button 
           onClick={() => { setRol(null); setVistaAuth('LOGIN'); }} 
           style={{ ...sideBtnStyle(false, sidebarAbierta), backgroundColor: 'rgba(255,255,255,0.1)', marginTop: 'auto' }}
@@ -96,25 +89,36 @@ function App() {
         </button>
       </aside>
 
-      {/* ÁREA DE CONTENIDO (Sección Dinámica) */}
+      {}
       <main style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
-        <header style={{ marginBottom: '30px', borderBottom: '2px solid #eee', paddingBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <header style={{ 
+          marginBottom: '30px', 
+          borderBottom: '2px solid #eee', 
+          paddingBottom: '20px', 
+          display: 'flex', 
+          justifyContent: 'space-between',
+          alignItems: 'center' 
+        }}>
           <div>
-            <h2 style={{ margin: 0, color: '#1a1a1a', fontSize: '24px' }}>
-              {vista === 'EXAMEN' && 'Módulo de Entrenamiento'}
-              {vista === 'FORM' && 'Proponer Nueva Evaluación'}
-              {vista === 'ADMIN' && 'Panel de Administración y Moderación'}
+            <h2 style={{ margin: 0, color: '#1a1a1a' }}>
+              {vista === 'EXAMEN' && 'Panel de Actividad'}
+              {vista === 'PRACTICAR' && 'Explorar Evaluaciones'}
+              {vista === 'FORM' && 'Colaboración (Crowdsourcing)'}
+              {vista === 'ADMIN' && 'Moderación de Contenido'}
             </h2>
-            <p style={{ color: '#666', margin: '5px 0 0 0' }}>Conectado como: <strong style={{color: '#7d5fff'}}>{rol}</strong></p>
+            <p style={{ color: '#666', margin: '5px 0 0 0' }}>
+              Rol: <strong style={{color: '#7d5fff'}}>{rol}</strong> | UAM Cuajimalpa
+            </p>
           </div>
-          <div style={{ fontSize: '12px', color: '#aaa', textAlign: 'right' }}>
-            UAM Cuajimalpa<br/>Ingeniería en Computación
+          <div style={{ textAlign: 'right', fontSize: '12px', color: '#999' }}>
+            {new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}
           </div>
         </header>
 
-        {/* INYECCIÓN DE COMPONENTES SEGÚN LA VISTA SELECCIONADA */}
-        <div style={{ maxWidth: '1000px', animation: 'fadeIn 0.5s' }}>
+        {}
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           {vista === 'EXAMEN' && <EntrenamientoPage />}
+          {vista === 'PRACTICAR' && <PracticarPage />}
           {vista === 'FORM' && <ReactivoForm />}
           {vista === 'ADMIN' && rol === 'ADMIN' && <AdminDashboardPage />}
         </div>
@@ -123,7 +127,6 @@ function App() {
   );
 }
 
-// --- ESTILOS INTERNOS (CSS-in-JS) ---
 const sideBtnStyle = (activo: boolean, abierta: boolean) => ({
   width: '100%',
   padding: '14px',
@@ -138,7 +141,9 @@ const sideBtnStyle = (activo: boolean, abierta: boolean) => ({
   transition: 'all 0.2s ease',
   display: 'flex',
   alignItems: 'center',
-  gap: '12px'
+  gap: '12px',
+  whiteSpace: 'nowrap' as const,
+  overflow: 'hidden'
 });
 
 const toggleBtnStyle: React.CSSProperties = {
@@ -151,12 +156,12 @@ const toggleBtnStyle: React.CSSProperties = {
   border: 'none',
   backgroundColor: '#58eb9f',
   cursor: 'pointer',
-  fontWeight: 'bold',
   boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  color: '#1a1a1a'
+  color: '#1a1a1a',
+  fontWeight: 'bold'
 };
 
 export default App;

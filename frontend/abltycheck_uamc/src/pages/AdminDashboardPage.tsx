@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 
-// Estructura de lo que Axel y Emilio te mandarán desde el Back
 interface PropuestaPendiente {
   id: string;
   titulo: string;
@@ -12,7 +11,7 @@ interface PropuestaPendiente {
 }
 
 export const AdminDashboardPage: React.FC = () => {
-  // Datos "Mock" para que tu captura de pantalla se vea real hoy mismo
+
   const [listaPendientes, setListaPendientes] = useState<PropuestaPendiente[]>([
     { id: '101', titulo: 'Redes de Computadoras', area: 'Computación', autor: 'Edgar Morales', fecha: '2026-03-28' },
     { id: '102', titulo: 'Cálculo Vectorial', area: 'Ciencias Básicas', autor: 'Axel G.', fecha: '2026-03-27' },
@@ -23,7 +22,7 @@ export const AdminDashboardPage: React.FC = () => {
     console.log(`Enviando a Emilio: Evaluación ${id} -> ${nuevoEstado}`);
     alert(`Evaluación ${nuevoEstado} con éxito.`);
     
-    // Simulamos que la quitamos de la lista después de actuar
+
     setListaPendientes(listaPendientes.filter(item => item.id !== id));
   };
 

@@ -3,7 +3,6 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 
-// Definimos la estructura de lo que vamos a enviar al Back de Emilio
 interface Reactivo {
   enunciado: string;
   opciones: string[];
@@ -12,18 +11,15 @@ interface Reactivo {
 export const ReactivoForm: React.FC = () => {
   const [titulo, setTitulo] = useState('');
   const [area, setArea] = useState('');
-  
-  // Estado dinámico: empezamos con una lista que tiene una pregunta vacía
+
   const [preguntas, setPreguntas] = useState<Reactivo[]>([
     { enunciado: '', opciones: ['', '', ''] }
   ]);
 
-  // Función para añadir un nuevo bloque de pregunta
   const agregarPregunta = () => {
     setPreguntas([...preguntas, { enunciado: '', opciones: ['', '', ''] }]);
   };
 
-  // Función para actualizar el enunciado de una pregunta específica
   const manejarCambioPregunta = (index: number, valor: string) => {
     const nuevasPreguntas = [...preguntas];
     nuevasPreguntas[index].enunciado = valor;
@@ -38,7 +34,7 @@ export const ReactivoForm: React.FC = () => {
 
   return (
     <Card titulo="Proponer Nueva Evaluación (Crowdsourcing)">
-      {/* CAMBIO: Se añadió color negro al contenedor del formulario */}
+      {}
       <div style={{ marginBottom: '20px', color: '#000000' }}>
         <Input 
           label="Título de la Evaluación" 
@@ -56,9 +52,8 @@ export const ReactivoForm: React.FC = () => {
 
       <hr style={{ margin: '20px 0', border: '0.5px solid #eee' }} />
 
-      {/* RENDERIZADO DINÁMICO: Aquí es donde ocurre la magia de la Semana 3 */}
+      {}
       {preguntas.map((p, index) => (
-        // CAMBIO: Se añadió color negro al contenedor de cada reactivo
         <div key={index} style={{ 
           marginBottom: '20px', 
           padding: '15px', 
@@ -74,7 +69,7 @@ export const ReactivoForm: React.FC = () => {
             value={p.enunciado}
             onChange={(e) => manejarCambioPregunta(index, e.target.value)}
           />
-          {/* CAMBIO: Se cambió el color del texto de ayuda a negro */}
+          {}
           <p style={{ fontSize: '12px', color: '#000000' }}>* Se incluirán 3 opciones por defecto al enviar.</p>
         </div>
       ))}
