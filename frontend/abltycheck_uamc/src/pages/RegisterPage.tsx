@@ -6,12 +6,19 @@ interface RegisterProps {
 }
 
 export const RegisterPage: React.FC<RegisterProps> = ({ alFinalizar, alIrALogin }) => {
-  const [datos, setDatos] = useState({ nombre: '', email: '', password: '', rol: 'ALUMNO' });
+  const [datos, setDatos] = useState({ 
+    nombre: '', 
+    matricula: '', 
+    email: '', 
+    password: '', 
+    rol: 'ALUMNO' 
+  });
 
   const manejarRegistro = (e: React.FormEvent) => {
     e.preventDefault();
+    // Aquí es donde Emilio y Max conectarán con Firebase
     console.log("Enviando a Firebase Admin SDK:", datos);
-    alert("¡Cuenta creada con éxito! Ahora puedes iniciar sesión.");
+    alert(`¡Cuenta creada con éxito para la matrícula ${datos.matricula}! Ahora puedes iniciar sesión.`);
     alFinalizar();
   };
 
@@ -39,7 +46,21 @@ export const RegisterPage: React.FC<RegisterProps> = ({ alFinalizar, alIrALogin 
                 type="text" 
                 placeholder="Ej. Edgar Morales" 
                 style={inputStyle} 
+                value={datos.nombre}
                 onChange={(e) => setDatos({...datos, nombre: e.target.value})}
+                required 
+              />
+            </div>
+
+            {}
+            <div style={{ marginBottom: '15px' }}>
+              <label style={labelStyle}>Matrícula</label>
+              <input 
+                type="text" 
+                placeholder="220300XXXX" 
+                style={inputStyle} 
+                value={datos.matricula}
+                onChange={(e) => setDatos({...datos, matricula: e.target.value.replace(/\D/g, '')})}
                 required 
               />
             </div>
@@ -50,17 +71,19 @@ export const RegisterPage: React.FC<RegisterProps> = ({ alFinalizar, alIrALogin 
                 type="email" 
                 placeholder="tu@alumnos.uam.mx" 
                 style={inputStyle} 
+                value={datos.email}
                 onChange={(e) => setDatos({...datos, email: e.target.value})}
                 required 
               />
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: '25px' }}>
               <label style={labelStyle}>Contraseña</label>
               <input 
                 type="password" 
                 placeholder="Crea una contraseña segura" 
                 style={inputStyle} 
+                value={datos.password}
                 onChange={(e) => setDatos({...datos, password: e.target.value})}
                 required 
               />
@@ -85,6 +108,6 @@ const panelIzquierdoStyle: React.CSSProperties = { flex: 1, background: 'linear-
 const panelDerechoStyle: React.CSSProperties = { flex: 1, backgroundColor: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '60px' };
 const logoStyle = { backgroundColor: 'rgba(255,255,255,0.2)', padding: '15px', borderRadius: '15px', fontSize: '30px', fontWeight: 'bold', marginBottom: '20px' };
 const labelStyle = { display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#333', fontSize: '14px' };
-const inputStyle = { width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd', backgroundColor: '#f9f9f9' };
-const mainButtonStyle = { width: '100%', padding: '15px', borderRadius: '12px', border: 'none', backgroundColor: '#58eb9f', color: '#1a1a1a', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer' };
+const inputStyle = { width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd', backgroundColor: '#f9f9f9', outline: 'none' };
+const mainButtonStyle = { width: '100%', padding: '15px', borderRadius: '12px', border: 'none', backgroundColor: '#58eb9f', color: '#1a1a1a', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer', transition: '0.2s' };
 const linkStyle = { color: '#7d5fff', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline' };
