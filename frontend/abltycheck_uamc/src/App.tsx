@@ -47,19 +47,19 @@ function App() {
             onClick={() => { setVista('PANEL'); setExamenActivo(null); }} 
             style={navBtnStyle(vista === 'PANEL' && !examenActivo)}
           >
-            🏠 Mi Panel
+            Mi Panel
           </button>
           <button 
             onClick={() => { setVista('PRACTICAR'); setExamenActivo(null); }} 
             style={navBtnStyle(vista === 'PRACTICAR' || !!examenActivo)}
           >
-            📖 Practicar
+            Practicar
           </button>
           <button 
             onClick={() => { setVista('CROWD'); setExamenActivo(null); }} 
             style={navBtnStyle(vista === 'CROWD')}
           >
-            ➕ Colaborar
+            Colaborar
           </button>
           
           {rol === 'ADMIN' && (
@@ -67,7 +67,7 @@ function App() {
               onClick={() => { setVista('ADMIN'); setExamenActivo(null); }} 
               style={navBtnStyle(vista === 'ADMIN')}
             >
-              🛡️ Panel Admin
+              Panel Admin
             </button>
           )}
         </nav>
