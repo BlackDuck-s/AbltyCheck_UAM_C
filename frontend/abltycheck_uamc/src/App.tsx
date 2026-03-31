@@ -5,22 +5,31 @@ import { EntrenamientoPage } from './pages/EntrenamientoPage';
 import { PracticarPage } from './pages/PracticarPage';
 import { ReactivoForm } from './pages/ReactivoForm';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { ResolverExamenPage } from './pages/ResolverExamenPage';
 
 function App() {
   const [rol, setRol] = useState<'ALUMNO' | 'ADMIN' | null>(null);
   const [vistaAuth, setVistaAuth] = useState<'LOGIN' | 'REGISTER'>('LOGIN');
   const [vista, setVista] = useState<'PANEL' | 'PRACTICAR' | 'CROWD' | 'ADMIN'>('PANEL');
+  const [examenActivo, setExamenActivo] = useState<string | null>(null);
 
   if (!rol) {
     return vistaAuth === 'LOGIN' 
-      ? <LoginPage alEntrar={(r) => { setRol(r); setVista(r === 'ADMIN' ? 'ADMIN' : 'PANEL'); }} alIrARegistro={() => setVistaAuth('REGISTER')} />
-      : <RegisterPage alFinalizar={() => setVistaAuth('LOGIN')} alIrALogin={() => setVistaAuth('LOGIN')} />;
+      ? <LoginPage 
+          alEntrar={(r) => { 
+            setRol(r); 
+            setVista(r === 'ADMIN' ? 'ADMIN' : 'PANEL'); 
+          }} 
+          alIrARegistro={() => setVistaAuth('REGISTER')} 
+        />
+      : <RegisterPage 
+          alFinalizar={() => setVistaAuth('LOGIN')} 
+          alIrALogin={() => setVistaAuth('LOGIN')} 
+        />;
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: '#f4f7f6' }}>
-      
-      {/* SIDEBAR FIJA */}
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: '#f4f7f6', overflow: 'hidden' }}>
       <aside style={{ 
         width: '260px', 
         minWidth: '260px', 
@@ -31,19 +40,43 @@ function App() {
         boxSizing: 'border-box',
         height: '100vh'
       }}>
-        <h2 style={{ textAlign: 'center', color: 'white', marginBottom: '40px' }}>AbltyCheck</h2>
+        <h2 style={{ textAlign: 'center', color: 'white', marginBottom: '40px', letterSpacing: '-1px' }}>AbltyCheck</h2>
+        
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
-          <button onClick={() => setVista('PANEL')} style={navBtnStyle(vista === 'PANEL')}>🏠 Mi Panel</button>
-          <button onClick={() => setVista('PRACTICAR')} style={navBtnStyle(vista === 'PRACTICAR')}>📖 Practicar</button>
-          <button onClick={() => setVista('CROWD')} style={navBtnStyle(vista === 'CROWD')}>➕ Colaborar</button>
+          <button 
+            onClick={() => { setVista('PANEL'); setExamenActivo(null); }} 
+            style={navBtnStyle(vista === 'PANEL' && !examenActivo)}
+          >
+            🏠 Mi Panel
+          </button>
+          <button 
+            onClick={() => { setVista('PRACTICAR'); setExamenActivo(null); }} 
+            style={navBtnStyle(vista === 'PRACTICAR' || !!examenActivo)}
+          >
+            📖 Practicar
+          </button>
+          <button 
+            onClick={() => { setVista('CROWD'); setExamenActivo(null); }} 
+            style={navBtnStyle(vista === 'CROWD')}
+          >
+            ➕ Colaborar
+          </button>
+          
           {rol === 'ADMIN' && (
-            <button onClick={() => setVista('ADMIN')} style={navBtnStyle(vista === 'ADMIN')}>🛡️ Panel Admin</button>
+            <button 
+              onClick={() => { setVista('ADMIN'); setExamenActivo(null); }} 
+              style={navBtnStyle(vista === 'ADMIN')}
+            >
+              🛡️ Panel Admin
+            </button>
           )}
         </nav>
-        <button onClick={() => setRol(null)} style={logoutBtnStyle}>Cerrar Sesión</button>
+
+        <button onClick={() => setRol(null)} style={logoutBtnStyle}>
+          Cerrar Sesión
+        </button>
       </aside>
 
-      {/* CONTENIDO PRINCIPAL SCROLLEABLE */}
       <main style={{ 
         flex: 1, 
         height: '100vh', 
@@ -55,10 +88,24 @@ function App() {
         alignItems: 'center'
       }}>
         <div style={{ width: '100%', maxWidth: '1200px' }}>
-          {vista === 'PANEL' && <EntrenamientoPage />}
-          {vista === 'PRACTICAR' && <PracticarPage />}
-          {vista === 'CROWD' && <ReactivoForm />}
-          {vista === 'ADMIN' && rol === 'ADMIN' && <AdminDashboardPage />}
+          {examenActivo ? (
+            <ResolverExamenPage 
+              titulo={examenActivo} 
+              alTerminar={() => {
+                setExamenActivo(null);
+                setVista('PANEL');
+              }} 
+            />
+          ) : (
+            <>
+              {vista === 'PANEL' && <EntrenamientoPage />}
+              {vista === 'PRACTICAR' && (
+                <PracticarPage alSeleccionarExamen={(titulo) => setExamenActivo(titulo)} />
+              )}
+              {vista === 'CROWD' && <ReactivoForm />}
+              {vista === 'ADMIN' && rol === 'ADMIN' && <AdminDashboardPage />}
+            </>
+          )}
         </div>
       </main>
     </div>
@@ -76,7 +123,7 @@ const navBtnStyle = (activo: boolean) => ({
   fontWeight: 'bold' as const,
   fontSize: '15px',
   width: '100%',
-  transition: '0.2s'
+  transition: '0.2s ease'
 });
 
 const logoutBtnStyle = {
@@ -87,7 +134,8 @@ const logoutBtnStyle = {
   borderRadius: '10px',
   cursor: 'pointer',
   width: '100%',
-  fontWeight: 'bold' as const
+  fontWeight: 'bold' as const,
+  marginTop: 'auto'
 };
 
 export default App;
