@@ -25,6 +25,8 @@ public class AuthController {
             AuthResponseDTO response = authService.login(request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error en Login: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }

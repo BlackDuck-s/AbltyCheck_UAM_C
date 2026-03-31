@@ -1,5 +1,6 @@
 package org.blackducks.config;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,6 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -31,28 +33,39 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+        return http
                 // Deshabilitamos CSRF porque usaremos JWT
                 .csrf(AbstractHttpConfigurer::disable)
+
                 // Habilitamos CORS para conectar con React/Vite
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // Las sesiones serán sin estado (Stateless)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 // Configuramos las rutas públicas y privadas
                 .authorizeHttpRequests(auth -> auth
+                        // 1. ZONA PÚBLICA (Cualquiera puede iniciar sesión o registrarse)
+                        .requestMatchers("/api/v1/auth/**").permitAll()
 
-                        .requestMatchers("/api/v1/auth/**").permitAll()// Login y registro son públicos
-                        .requestMatchers("/api/v1/auth/**").hasRole("ADMIN")
-                        .anyRequest().authenticated() // Todo lo demás requiere token
+                        // 2. ZONA EXCLUSIVA ADMIN (Ver pendientes y aprobar/rechazar)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/evaluaciones/pendientes").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/evaluaciones/*/estado").hasAuthority("ADMIN")
+
+                        // 3. ZONA DE CROWDSOURCING (Alumnos y Admins pueden proponer exámenes)
+                        .requestMatchers(HttpMethod.POST, "/api/v1/evaluaciones").hasAnyAuthority("ALUMNO", "ADMIN")
+
+                        // 4. Todo lo demás (como obtenerPorArea para practicar) requiere estar logueado
+                        .anyRequest().authenticated()
                 )
-                // Las sesiones serán sin estado (Stateless)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
                 // Le decimos a Spring que nuestro proveedor de usuarios es CustomUserDetailsService
-                 http.userDetailsService(userDetailsService);
+                .userDetailsService(userDetailsService)
 
-                 // Insertamos el filtro antes que el de Spring
-                http.addFilterBefore(jwtAuthFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+                // Insertamos el filtro JWT antes que el de Spring
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
-        return http.build();
+                .build();
     }
 
     @Bean

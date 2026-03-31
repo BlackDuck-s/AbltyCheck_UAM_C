@@ -3,7 +3,7 @@ package org.blackducks.entity;
 import lombok.Data;
 import org.blackducks.entity.Reactivo;
 import lombok.NoArgsConstructor;
-
+import java.util.UUID;
 import java.util.List;
 
 @Data

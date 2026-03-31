@@ -48,7 +48,7 @@ public class EvaluacionBuilder {
 
     public Evaluacion build() {
         Evaluacion evaluacion = new Evaluacion();
-        evaluacion.setId(this.id);
+        this.id = UUID.randomUUID().toString();
         evaluacion.setTitulo(this.titulo);
         evaluacion.setArea(this.area);
         evaluacion.setAutorId(this.autorId);

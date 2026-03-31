@@ -39,6 +39,21 @@ public class EvaluacionController {
         return ResponseEntity.ok(evaluacionService.obtenerPorArea(area));
     }
 
+    // Ruta para que el Admin vea lo que está en revisión
+    @GetMapping("/pendientes")
+    public ResponseEntity<List<Evaluacion>> obtenerPendientes() {
+        return ResponseEntity.ok(evaluacionService.obtenerPendientes());
+    }
+
+    // Ruta para que el Admin apruebe o rechace un examen
+    @PutMapping("/{id}/estado")
+    public ResponseEntity<String> actualizarEstado(
+            @PathVariable String id,
+            @RequestParam String estado
+    ) {
+        return ResponseEntity.ok(evaluacionService.actualizarEstado(id, estado));
+    }
+
     @PostMapping("/{id}/evaluar")
     public ResponseEntity<ResultadoEvaluacionDTO> evaluarEvaluacion(
             @PathVariable String id,
