@@ -16,7 +16,7 @@ public class FirebaseConfig {
     @PostConstruct
     public void init() {
         try {
-            InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-adminsdk.json");
+            InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("serviceAccount.json");
 
             if (serviceAccount == null) {
                 throw new RuntimeException("No se encontró el archivo de credenciales de Firebase");
