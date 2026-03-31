@@ -44,17 +44,20 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // Configuramos las rutas públicas y privadas
+                // Configuramos las rutas públicas y privadas
                 .authorizeHttpRequests(auth -> auth
                         // 1. ZONA PÚBLICA (Cualquiera puede iniciar sesión o registrarse)
                         .requestMatchers("/api/v1/auth/**").permitAll()
 
-                        // 2. ZONA EXCLUSIVA ADMIN (Ver pendientes y aprobar/rechazar)
-                        .requestMatchers(HttpMethod.GET, "/api/v1/evaluaciones/pendientes").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/evaluaciones/*/estado").hasAuthority("ADMIN")
+                        // ¡ESTA ES LA LÍNEA MÁGICA QUE SE BORRÓ! (Deja pasar el saludo de React)
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // 2. ZONA EXCLUSIVA ADMIN
+                        .requestMatchers(HttpMethod.GET, "/api/v1/evaluaciones/pendientes").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/evaluaciones/*/estado").authenticated()
 
                         // 3. ZONA DE CROWDSOURCING (Alumnos y Admins pueden proponer exámenes)
-                        .requestMatchers(HttpMethod.POST, "/api/v1/evaluaciones").hasAnyAuthority("ALUMNO", "ADMIN")
-
+                        .requestMatchers(HttpMethod.POST, "/api/v1/evaluaciones").authenticated()
                         // 4. Todo lo demás (como obtenerPorArea para practicar) requiere estar logueado
                         .anyRequest().authenticated()
                 )

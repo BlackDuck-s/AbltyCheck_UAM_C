@@ -1,125 +1,63 @@
 import { useState } from 'react';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
-import { ReactivoForm } from './pages/ReactivoForm';
-import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { EntrenamientoPage } from './pages/EntrenamientoPage';
 import { PracticarPage } from './pages/PracticarPage';
+import { ReactivoForm } from './pages/ReactivoForm';
+import { AdminDashboardPage } from './pages/AdminDashboardPage';
 
 function App() {
   const [rol, setRol] = useState<'ALUMNO' | 'ADMIN' | null>(null);
   const [vistaAuth, setVistaAuth] = useState<'LOGIN' | 'REGISTER'>('LOGIN');
-  const [vista, setVista] = useState<'EXAMEN' | 'PRACTICAR' | 'FORM' | 'ADMIN'>('EXAMEN');
-  const [sidebarAbierta, setSidebarAbierta] = useState(true);
-
-  const manejarLogin = (nuevoRol: 'ALUMNO' | 'ADMIN') => {
-    setRol(nuevoRol);
-    setVista(nuevoRol === 'ADMIN' ? 'ADMIN' : 'EXAMEN');
-  };
+  const [vista, setVista] = useState<'PANEL' | 'PRACTICAR' | 'CROWD' | 'ADMIN'>('PANEL');
 
   if (!rol) {
-    return vistaAuth === 'LOGIN' ? (
-      <LoginPage 
-        alEntrar={manejarLogin} 
-        alIrARegistro={() => setVistaAuth('REGISTER')} 
-      />
-    ) : (
-      <RegisterPage 
-        alFinalizar={() => setVistaAuth('LOGIN')} 
-        alIrALogin={() => setVistaAuth('LOGIN')} 
-      />
-    );
+    return vistaAuth === 'LOGIN' 
+      ? <LoginPage alEntrar={(r) => { setRol(r); setVista(r === 'ADMIN' ? 'ADMIN' : 'PANEL'); }} alIrARegistro={() => setVistaAuth('REGISTER')} />
+      : <RegisterPage alFinalizar={() => setVistaAuth('LOGIN')} alIrALogin={() => setVistaAuth('LOGIN')} />;
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f4f7f6', fontFamily: 'sans-serif' }}>
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: '#f4f7f6' }}>
       
-      {}
-      <aside style={{
-        width: sidebarAbierta ? '260px' : '80px',
-        backgroundColor: '#7d5fff',
-        color: 'white',
-        transition: 'all 0.3s ease',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '20px 10px',
-        boxShadow: '4px 0 15px rgba(0,0,0,0.1)',
-        position: 'relative',
-        zIndex: 100
+      {/* SIDEBAR FIJA */}
+      <aside style={{ 
+        width: '260px', 
+        minWidth: '260px', 
+        backgroundColor: '#7d5fff', 
+        padding: '20px', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        boxSizing: 'border-box',
+        height: '100vh'
       }}>
-        {}
-        <button 
-          onClick={() => setSidebarAbierta(!sidebarAbierta)}
-          style={toggleBtnStyle}
-        >
-          {sidebarAbierta ? '◀' : '▶'}
-        </button>
-
-        <div style={{ textAlign: 'center', marginBottom: '40px', fontWeight: 'bold', fontSize: '22px' }}>
-          {sidebarAbierta ? 'AbltyCheck' : 'A'}
-        </div>
-
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-          <button onClick={() => setVista('EXAMEN')} style={sideBtnStyle(vista === 'EXAMEN', sidebarAbierta)}>
-             {sidebarAbierta ? '🏠 Mi Panel' : '🏠'}
-          </button>
-
-          <button onClick={() => setVista('PRACTICAR')} style={sideBtnStyle(vista === 'PRACTICAR', sidebarAbierta)}>
-             {sidebarAbierta ? '📖 Practicar' : '📖'}
-          </button>
-          
-          <button onClick={() => setVista('FORM')} style={sideBtnStyle(vista === 'FORM', sidebarAbierta)}>
-             {sidebarAbierta ? '➕ Crowdsourcing' : '➕'}
-          </button>
-          
-          {}
+        <h2 style={{ textAlign: 'center', color: 'white', marginBottom: '40px' }}>AbltyCheck</h2>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+          <button onClick={() => setVista('PANEL')} style={navBtnStyle(vista === 'PANEL')}>🏠 Mi Panel</button>
+          <button onClick={() => setVista('PRACTICAR')} style={navBtnStyle(vista === 'PRACTICAR')}>📖 Practicar</button>
+          <button onClick={() => setVista('CROWD')} style={navBtnStyle(vista === 'CROWD')}>➕ Colaborar</button>
           {rol === 'ADMIN' && (
-            <button onClick={() => setVista('ADMIN')} style={sideBtnStyle(vista === 'ADMIN', sidebarAbierta)}>
-               {sidebarAbierta ? '🛡️ Panel Admin' : '🛡️'}
-            </button>
+            <button onClick={() => setVista('ADMIN')} style={navBtnStyle(vista === 'ADMIN')}>🛡️ Panel Admin</button>
           )}
         </nav>
-
-        {}
-        <button 
-          onClick={() => { setRol(null); setVistaAuth('LOGIN'); }} 
-          style={{ ...sideBtnStyle(false, sidebarAbierta), backgroundColor: 'rgba(255,255,255,0.1)', marginTop: 'auto' }}
-        >
-          {sidebarAbierta ? '🚪 Cerrar Sesión' : '🚪'}
-        </button>
+        <button onClick={() => setRol(null)} style={logoutBtnStyle}>Cerrar Sesión</button>
       </aside>
 
-      {}
-      <main style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
-        <header style={{ 
-          marginBottom: '30px', 
-          borderBottom: '2px solid #eee', 
-          paddingBottom: '20px', 
-          display: 'flex', 
-          justifyContent: 'space-between',
-          alignItems: 'center' 
-        }}>
-          <div>
-            <h2 style={{ margin: 0, color: '#1a1a1a' }}>
-              {vista === 'EXAMEN' && 'Panel de Actividad'}
-              {vista === 'PRACTICAR' && 'Explorar Evaluaciones'}
-              {vista === 'FORM' && 'Colaboración (Crowdsourcing)'}
-              {vista === 'ADMIN' && 'Moderación de Contenido'}
-            </h2>
-            <p style={{ color: '#666', margin: '5px 0 0 0' }}>
-              Rol: <strong style={{color: '#7d5fff'}}>{rol}</strong> | UAM Cuajimalpa
-            </p>
-          </div>
-          <div style={{ textAlign: 'right', fontSize: '12px', color: '#999' }}>
-            {new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}
-          </div>
-        </header>
-
-        {}
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          {vista === 'EXAMEN' && <EntrenamientoPage />}
+      {/* CONTENIDO PRINCIPAL SCROLLEABLE */}
+      <main style={{ 
+        flex: 1, 
+        height: '100vh', 
+        overflowY: 'auto', 
+        padding: '40px', 
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      }}>
+        <div style={{ width: '100%', maxWidth: '1200px' }}>
+          {vista === 'PANEL' && <EntrenamientoPage />}
           {vista === 'PRACTICAR' && <PracticarPage />}
-          {vista === 'FORM' && <ReactivoForm />}
+          {vista === 'CROWD' && <ReactivoForm />}
           {vista === 'ADMIN' && rol === 'ADMIN' && <AdminDashboardPage />}
         </div>
       </main>
@@ -127,41 +65,29 @@ function App() {
   );
 }
 
-const sideBtnStyle = (activo: boolean, abierta: boolean) => ({
-  width: '100%',
-  padding: '14px',
-  cursor: 'pointer',
-  backgroundColor: activo ? 'rgba(255,255,255,0.25)' : 'transparent',
+const navBtnStyle = (activo: boolean) => ({
+  backgroundColor: activo ? 'rgba(255,255,255,0.2)' : 'transparent',
   color: 'white',
   border: 'none',
-  borderRadius: '12px',
-  textAlign: abierta ? 'left' as const : 'center' as const,
+  padding: '12px 15px',
+  borderRadius: '10px',
+  textAlign: 'left' as const,
+  cursor: 'pointer',
   fontWeight: 'bold' as const,
   fontSize: '15px',
-  transition: 'all 0.2s ease',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '12px',
-  whiteSpace: 'nowrap' as const,
-  overflow: 'hidden'
+  width: '100%',
+  transition: '0.2s'
 });
 
-const toggleBtnStyle: React.CSSProperties = {
-  position: 'absolute',
-  right: '-15px',
-  top: '25px',
-  width: '30px',
-  height: '30px',
-  borderRadius: '50%',
+const logoutBtnStyle = {
+  backgroundColor: 'rgba(0,0,0,0.1)',
+  color: 'white',
   border: 'none',
-  backgroundColor: '#58eb9f',
+  padding: '12px',
+  borderRadius: '10px',
   cursor: 'pointer',
-  boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  color: '#1a1a1a',
-  fontWeight: 'bold'
+  width: '100%',
+  fontWeight: 'bold' as const
 };
 
 export default App;

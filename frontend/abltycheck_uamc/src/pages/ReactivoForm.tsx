@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
-import api from '../config/axiosConfig'; // ¡Nuestro puente mágico!
+import api from '../config/axiosConfig';
 
-// 1. Alineamos las interfaces exactamente con tus DTOs / Entidades de Java
 interface Opcion {
   texto: string;
   esCorrecta: boolean;
@@ -13,38 +12,38 @@ interface Opcion {
 interface Reactivo {
   enunciado: string;
   opciones: Opcion[];
+  // Agregamos estos campos para que dejen de ser null en Firebase
+  areaConocimiento?: string;
+  dificultad?: string;
+  autorId?: string;
 }
 
 export const ReactivoForm: React.FC = () => {
   const [titulo, setTitulo] = useState('');
   const [area, setArea] = useState('');
+  const [dificultad, setDificultad] = useState('Media'); // ¡Nuevo estado!
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
 
-  // 2. Inicializamos con 3 opciones vacías, asignando la primera como correcta por defecto
   const [preguntas, setPreguntas] = useState<Reactivo[]>([
-    { 
-      enunciado: '', 
-      opciones: [
-        { texto: '', esCorrecta: true },
-        { texto: '', esCorrecta: false },
-        { texto: '', esCorrecta: false }
-      ] 
-    }
+    { enunciado: '', opciones: [{ texto: '', esCorrecta: true }, { texto: '', esCorrecta: false }, { texto: '', esCorrecta: false }] }
   ]);
 
+  // Truco Tech Lead: Decodificamos el JWT para sacar la matrícula del usuario
+  const obtenerMatriculaDelToken = () => {
+    const token = localStorage.getItem('jwt_token');
+    if (!token) return 'Anónimo';
+    try {
+      // El token JWT tiene 3 partes separadas por puntos. La del medio tiene los datos.
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.sub || 'Anónimo'; // 'sub' (Subject) suele guardar el usuario/matrícula
+    } catch (e) {
+      return 'Anónimo';
+    }
+  };
+
   const agregarPregunta = () => {
-    setPreguntas([
-      ...preguntas, 
-      { 
-        enunciado: '', 
-        opciones: [
-          { texto: '', esCorrecta: true },
-          { texto: '', esCorrecta: false },
-          { texto: '', esCorrecta: false }
-        ] 
-      }
-    ]);
+    setPreguntas([...preguntas, { enunciado: '', opciones: [{ texto: '', esCorrecta: true }, { texto: '', esCorrecta: false }, { texto: '', esCorrecta: false }] }]);
   };
 
   const manejarCambioEnunciado = (indexPregunta: number, valor: string) => {
@@ -61,9 +60,7 @@ export const ReactivoForm: React.FC = () => {
 
   const marcarComoCorrecta = (indexPregunta: number, indexOpcionCorrecta: number) => {
     const nuevasPreguntas = [...preguntas];
-    // Ponemos todas en false
     nuevasPreguntas[indexPregunta].opciones.forEach(op => op.esCorrecta = false);
-    // Ponemos solo la seleccionada en true
     nuevasPreguntas[indexPregunta].opciones[indexOpcionCorrecta].esCorrecta = true;
     setPreguntas(nuevasPreguntas);
   };
@@ -72,23 +69,32 @@ export const ReactivoForm: React.FC = () => {
     setLoading(true);
     setMensaje({ texto: '', tipo: '' });
 
+    const autorActual = obtenerMatriculaDelToken();
+
+    // Rellenamos los "nulls" de cada pregunta con los datos del formulario
+    const preguntasCompletas = preguntas.map(p => ({
+      ...p,
+      areaConocimiento: area,
+      dificultad: dificultad,
+      autorId: autorActual
+    }));
+
+    // Armamos el paquete maestro sin nulls
     const propuestaFinal = { 
       titulo, 
       area, 
+      dificultad, // Enviamos la dificultad general
+      autorId: autorActual, // Enviamos el autor general
       estado: "PENDIENTE",
-      preguntas 
+      preguntas: preguntasCompletas 
     };
 
     try {
       await api.post('/evaluaciones', propuestaFinal);
-      
       setMensaje({ texto: '¡Propuesta enviada con éxito al Panel de Admin!', tipo: 'success' });
-      setTitulo('');
-      setArea('');
+      setTitulo(''); setArea(''); setDificultad('Media');
       setPreguntas([{ enunciado: '', opciones: [{ texto: '', esCorrecta: true }, { texto: '', esCorrecta: false }, { texto: '', esCorrecta: false }] }]);
-      
     } catch (err: any) {
-      console.error("Error al enviar evaluación:", err);
       setMensaje({ texto: 'Hubo un error al enviar tu propuesta. Verifica tu conexión.', tipo: 'error' });
     } finally {
       setLoading(false);
@@ -97,89 +103,54 @@ export const ReactivoForm: React.FC = () => {
 
   return (
     <Card titulo="Proponer Nueva Evaluación (Crowdsourcing)">
-      <div style={{ marginBottom: '20px', color: '#000000' }}>
-        <Input 
-          label="Título de la Evaluación" 
-          placeholder="Ej. Programación Concurrente" 
-          value={titulo} 
-          onChange={(e) => setTitulo(e.target.value)} 
-        />
-        <Input 
-          label="Área Académica" 
-          placeholder="Ej. Computación, Matemáticas..." 
-          value={area} 
-          onChange={(e) => setArea(e.target.value)} 
-        />
+      <div style={{ marginBottom: '20px', color: '#000' }}>
+        <Input label="Título de la Evaluación" placeholder="Ej. Programación Concurrente" value={titulo} onChange={(e) => setTitulo(e.target.value)} />
+        <Input label="Área Académica" placeholder="Ej. Computación, Matemáticas..." value={area} onChange={(e) => setArea(e.target.value)} />
+        
+        {/* NUEVO: Desplegable de Dificultad */}
+        <div style={{ marginTop: '15px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#444' }}>Dificultad</label>
+          <select 
+            value={dificultad} 
+            onChange={(e) => setDificultad(e.target.value)}
+            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd', backgroundColor: '#f9f9f9', fontSize: '15px' }}
+          >
+            <option value="Fácil">Fácil</option>
+            <option value="Media">Media</option>
+            <option value="Alta">Alta</option>
+          </select>
+        </div>
       </div>
 
       <hr style={{ margin: '20px 0', border: '0.5px solid #eee' }} />
 
       {preguntas.map((p, indexPregunta) => (
-        <div key={indexPregunta} style={{ 
-          marginBottom: '20px', padding: '15px', backgroundColor: '#f8f9fa', 
-          borderRadius: '8px', borderLeft: '5px solid #7d5fff', color: '#000000'
-        }}>
+        <div key={indexPregunta} style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '8px', borderLeft: '5px solid #7d5fff', color: '#000' }}>
           <h4 style={{ marginTop: 0, marginBottom: '15px' }}>Reactivo #{indexPregunta + 1}</h4>
-          
           <div style={{ marginBottom: '15px' }}>
-            <Input 
-              label="Enunciado de la pregunta" 
-              placeholder="¿Qué es un hilo (thread)?" 
-              value={p.enunciado}
-              onChange={(e) => manejarCambioEnunciado(indexPregunta, e.target.value)}
-            />
+            <Input label="Enunciado de la pregunta" placeholder="¿Qué es un hilo (thread)?" value={p.enunciado} onChange={(e) => manejarCambioEnunciado(indexPregunta, e.target.value)} />
           </div>
-
-          <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold', fontSize: '14px' }}>
-            Opciones (Selecciona la correcta):
-          </label>
-          
+          <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold', fontSize: '14px' }}>Opciones (Selecciona la correcta):</label>
           {p.opciones.map((opcion, indexOpcion) => (
             <div key={indexOpcion} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-              {/* Radio button para elegir la respuesta correcta */}
-              <input 
-                type="radio" 
-                name={`correcta-${indexPregunta}`} 
-                checked={opcion.esCorrecta}
-                onChange={() => marcarComoCorrecta(indexPregunta, indexOpcion)}
-                style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
-                title="Marcar como respuesta correcta"
-              />
+              <input type="radio" name={`correcta-${indexPregunta}`} checked={opcion.esCorrecta} onChange={() => marcarComoCorrecta(indexPregunta, indexOpcion)} style={{ cursor: 'pointer', transform: 'scale(1.2)' }} />
               <div style={{ flex: 1 }}>
-                <Input 
-                  label="" 
-                  placeholder={`Opción ${indexOpcion + 1}`} 
-                  value={opcion.texto}
-                  onChange={(e) => manejarCambioOpcion(indexPregunta, indexOpcion, e.target.value)}
-                />
+                <Input label="" placeholder={`Opción ${indexOpcion + 1}`} value={opcion.texto} onChange={(e) => manejarCambioOpcion(indexPregunta, indexOpcion, e.target.value)} />
               </div>
             </div>
           ))}
         </div>
       ))}
 
-      {/* Mensajes de éxito o error */}
       {mensaje.texto && (
-        <div style={{ 
-          padding: '10px', marginBottom: '20px', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold',
-          backgroundColor: mensaje.tipo === 'success' ? '#d4edda' : '#f8d7da',
-          color: mensaje.tipo === 'success' ? '#155724' : '#721c24'
-        }}>
+        <div style={{ padding: '10px', marginBottom: '20px', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold', backgroundColor: mensaje.tipo === 'success' ? '#d4edda' : '#f8d7da', color: mensaje.tipo === 'success' ? '#155724' : '#721c24' }}>
           {mensaje.texto}
         </div>
       )}
 
       <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-        <Button 
-          label="+ Agregar otra pregunta" 
-          onClick={agregarPregunta} 
-          variant="secondary" 
-        />
-        <Button 
-          label={loading ? "Enviando..." : "Enviar Propuesta Completa"} 
-          onClick={enviarPropuesta} 
-          disabled={loading || !titulo || !area || preguntas[0].enunciado === ''}
-        />
+        <Button label="+ Agregar otra pregunta" onClick={agregarPregunta} variant="secondary" />
+        <Button label={loading ? "Enviando..." : "Enviar Propuesta Completa"} onClick={enviarPropuesta} disabled={loading || !titulo || !area || preguntas[0].enunciado === ''} />
       </div>
     </Card>
   );

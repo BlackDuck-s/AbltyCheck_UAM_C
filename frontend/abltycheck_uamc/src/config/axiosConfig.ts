@@ -1,26 +1,23 @@
-import axios, { type InternalAxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
-// Creamos una instancia configurada de Axios
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1',
+  baseURL: 'http://localhost:8080/api/v1', 
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
-// Interceptor: Antes de que salga cualquier petición, revisamos si ya tenemos un Token
 api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  (config) => {
     const token = localStorage.getItem('jwt_token');
     
-    // Si hay token y los headers existen, inyectamos el JWT
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
     
     return config;
-  }, 
-  (error: any) => {
+  },
+  (error) => {
     return Promise.reject(error);
   }
 );
