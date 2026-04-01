@@ -1,12 +1,12 @@
 package org.blackducks.service;
 
-import org.blackducks.entity.Evaluacion;
-import org.blackducks.repository.EvaluacionRepository;
-import org.springframework.stereotype.Service;
-import org.blackducks.dto.ResultadoEvaluacionDTO;
 import org.blackducks.dto.RespuestaReactivoDTO;
-import org.blackducks.entity.Opcion;
-import org.blackducks.entity.Reactivo;
+import org.blackducks.dto.ResultadoEvaluacionDTO;
+import org.blackducks.entity.*;
+import org.blackducks.repository.EvaluacionRepository;
+import org.blackducks.repository.ResultadoRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -15,10 +15,13 @@ import java.util.concurrent.ExecutionException;
 public class EvaluacionService {
 
     private final EvaluacionRepository evaluacionRepository;
+    private final ResultadoRepository resultadoRepository;
 
-    public EvaluacionService(EvaluacionRepository evaluacionRepository) {
+    public EvaluacionService(EvaluacionRepository evaluacionRepository, ResultadoRepository resultadoRepository) {
         this.evaluacionRepository = evaluacionRepository;
+        this.resultadoRepository = resultadoRepository;
     }
+
 
     public String crearEvaluacion(Evaluacion evaluacion) {
         try {
@@ -42,7 +45,7 @@ public class EvaluacionService {
             return evaluacionRepository.obtenerPorId(id)
                     .orElseThrow(() -> new RuntimeException("Evaluación no encontrada con ID: " + id));
         } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException("Error al obtener la evaluación", e);
+            throw new RuntimeException("Error de conexión con Firebase al buscar ID: " + id, e);
         }
     }
 
@@ -105,7 +108,18 @@ public class EvaluacionService {
             }
 
             double calificacion = totalPreguntas == 0 ? 0.0 : ((double) aciertos / totalPreguntas) * 100.0;
+            String matricula = SecurityContextHolder.getContext().getAuthentication().getName();
 
+            ResultadoHistorico historico = new ResultadoHistorico();
+            historico.setUsuarioId(matricula);
+            historico.setEvaluacionId(evaluacion.getId());
+            historico.setTitulo(evaluacion.getTitulo());
+            historico.setArea(evaluacion.getArea());
+            historico.setCalificacion(calificacion);
+            historico.setAciertos(aciertos);
+            historico.setTotalPreguntas(totalPreguntas);
+            historico.setDificultad(evaluacion.getDificultad());
+            resultadoRepository.guardar(historico);
             return new ResultadoEvaluacionDTO(totalPreguntas, aciertos, calificacion);
 
         } catch (ExecutionException | InterruptedException e) {

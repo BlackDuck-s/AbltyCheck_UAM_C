@@ -58,6 +58,7 @@ public class SecurityConfig {
 
                         // 3. ZONA DE CROWDSOURCING (Alumnos y Admins pueden proponer exámenes)
                         .requestMatchers(HttpMethod.POST, "/api/v1/evaluaciones").authenticated()
+                        .requestMatchers("/api/v1/historial/**").authenticated()
                         // 4. Todo lo demás (como obtenerPorArea para practicar) requiere estar logueado
                         .anyRequest().authenticated()
                 )

@@ -1,31 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { RadarSkills } from '../components/RadarSkills';
-
-const actividadReciente = [
-  { id: 101, titulo: 'Examen Diagnóstico: Bases de Datos', fecha: '30 Mar, 2026', puntaje: 85, area: 'Bases de Datos' },
-  { id: 102, titulo: 'Quiz: Programación Orientada a Objetos', fecha: '28 Mar, 2026', puntaje: 92, area: 'POO' },
-  { id: 103, titulo: 'Práctica: Estructuras de Datos Lineales', fecha: '25 Mar, 2026', puntaje: 70, area: 'Estructuras' },
-  { id: 104, titulo: 'Evaluación: Algoritmos de Ordenamiento', fecha: '22 Mar, 2026', puntaje: 65, area: 'Algoritmos' },
-];
+import api from '../config/axiosConfig';
+// 1. Aquí ya estamos importando la interfaz oficial. ¡Perfecto!
+import { RadarSkills, type ResultadoHistorico } from '../components/RadarSkills';
 
 export const EntrenamientoPage: React.FC = () => {
-  
-  const verResultados = (id: number) => {
-    console.log(`Consultando resultados del test: ${id}`);
-    alert("Abriendo reporte de retroalimentación...");
+  const [historial, setHistorial] = useState<ResultadoHistorico[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // 1. Cargar el historial real al abrir la página
+  useEffect(() => {
+    const cargarHistorial = async () => {
+      try {
+        const response = await api.get('/historial/mis-resultados');
+        setHistorial(response.data);
+      } catch (error) {
+        console.error("Error al obtener historial:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    cargarHistorial();
+  }, []);
+
+  // 2. Función para formatear la fecha de Java (ISO) a algo más humano
+  const formatearFecha = (fechaStr: string) => {
+    const fecha = new Date(fechaStr);
+    return fecha.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', animation: 'fadeIn 0.5s' }}>
       
-      {}
+      {/* SECCIÓN DE RADAR: Le pasamos el historial para que calcule los promedios */}
       <section>
-        <RadarSkills />
+        <RadarSkills datos={historial} />
       </section>
 
-      {}
       <section>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h3 style={{ color: '#1a1a1a', margin: 0, fontSize: '20px', borderLeft: '5px solid #7d5fff', paddingLeft: '15px' }}>
@@ -35,37 +47,45 @@ export const EntrenamientoPage: React.FC = () => {
         </div>
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-          {actividadReciente.map((test) => (
-            <Card key={test.id} titulo={test.titulo}>
-              <div style={{ fontSize: '14px', color: '#666', marginBottom: '15px' }}>
-                <p style={{ margin: '5px 0' }}>📅 <strong>Fecha:</strong> {test.fecha}</p>
-                <p style={{ margin: '5px 0' }}>🏷️ <strong>Área:</strong> {test.area}</p>
-                <div style={{ marginTop: '10px' }}>
-                  <label style={{ display: 'block', marginBottom: '5px' }}><strong>Puntaje:</strong> {test.puntaje}%</label>
-                  {}
-                  <div style={{ width: '100%', backgroundColor: '#eee', borderRadius: '10px', height: '8px' }}>
-                    <div style={{ 
-                      width: `${test.puntaje}%`, 
-                      backgroundColor: test.puntaje >= 80 ? '#58eb9f' : test.puntaje >= 70 ? '#ffc107' : '#ff4d4d', 
-                      height: '100%', 
-                      borderRadius: '10px',
-                      transition: 'width 1s ease-in-out'
-                    }}></div>
+          {loading ? (
+            <p style={{ textAlign: 'center', gridColumn: '1/-1', color: '#666' }}>Cargando tu progreso...</p>
+          ) : historial.length > 0 ? (
+            // Mostramos los últimos 4 resultados
+            historial.slice(-4).reverse().map((test) => (
+              <Card key={test.id} titulo={test.titulo}>
+                <div style={{ fontSize: '14px', color: '#666', marginBottom: '15px' }}>
+                  <p style={{ margin: '5px 0' }}>📅 <strong>Fecha:</strong> {formatearFecha(test.fecha)}</p>
+                  <p style={{ margin: '5px 0' }}>🏷️ <strong>Área:</strong> {test.area}</p>
+                  <p style={{ margin: '5px 0' }}>⭐ <strong>Nivel:</strong> {test.dificultad || 'Licenciatura'}</p>
+                  <div style={{ marginTop: '10px' }}>
+                    <label style={{ display: 'block', marginBottom: '5px' }}><strong>Puntaje:</strong> {test.calificacion.toFixed(1)}%</label>
+                    <div style={{ width: '100%', backgroundColor: '#eee', borderRadius: '10px', height: '8px' }}>
+                      <div style={{ 
+                        width: `${test.calificacion}%`, 
+                        backgroundColor: test.calificacion >= 80 ? '#58eb9f' : test.calificacion >= 60 ? '#ffc107' : '#ff4d4d', 
+                        height: '100%', 
+                        borderRadius: '10px',
+                        transition: 'width 1s ease-in-out'
+                      }}></div>
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              <Button 
-                label="Revisar Detalles" 
-                variant="secondary"
-                onClick={() => verResultados(test.id)} 
-              />
-            </Card>
-          ))}
+                <Button 
+                  label="Revisar Detalles" 
+                  variant="secondary"
+                  onClick={() => alert("Próximamente: Reporte detallado de respuestas.")} 
+                />
+              </Card>
+            ))
+          ) : (
+            <p style={{ textAlign: 'center', gridColumn: '1/-1', color: '#999', padding: '40px' }}>
+              Aún no has realizado ninguna evaluación. ¡Empieza hoy!
+            </p>
+          )}
         </div>
       </section>
 
-      {}
+      {/* BANNER DE ACCIÓN */}
       <div style={{ 
         backgroundColor: '#7d5fff', 
         padding: '30px', 
@@ -92,7 +112,6 @@ export const EntrenamientoPage: React.FC = () => {
           Nueva Evaluación
         </button>
       </div>
-
     </div>
   );
 };

@@ -12,7 +12,6 @@ interface Opcion {
 interface Reactivo {
   enunciado: string;
   opciones: Opcion[];
-  // Agregamos estos campos para que dejen de ser null en Firebase
   areaConocimiento?: string;
   dificultad?: string;
   autorId?: string;
@@ -20,8 +19,9 @@ interface Reactivo {
 
 export const ReactivoForm: React.FC = () => {
   const [titulo, setTitulo] = useState('');
-  const [area, setArea] = useState('');
-  const [dificultad, setDificultad] = useState('Media'); // ¡Nuevo estado!
+  // 1. Ponemos un valor por defecto que coincida con tu radar
+  const [area, setArea] = useState('Bases de Datos'); 
+  const [dificultad, setDificultad] = useState('Media'); 
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
 
@@ -29,14 +29,12 @@ export const ReactivoForm: React.FC = () => {
     { enunciado: '', opciones: [{ texto: '', esCorrecta: true }, { texto: '', esCorrecta: false }, { texto: '', esCorrecta: false }] }
   ]);
 
-  // Truco Tech Lead: Decodificamos el JWT para sacar la matrícula del usuario
   const obtenerMatriculaDelToken = () => {
     const token = localStorage.getItem('jwt_token');
     if (!token) return 'Anónimo';
     try {
-      // El token JWT tiene 3 partes separadas por puntos. La del medio tiene los datos.
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.sub || 'Anónimo'; // 'sub' (Subject) suele guardar el usuario/matrícula
+      return payload.sub || 'Anónimo'; 
     } catch (e) {
       return 'Anónimo';
     }
@@ -71,7 +69,6 @@ export const ReactivoForm: React.FC = () => {
 
     const autorActual = obtenerMatriculaDelToken();
 
-    // Rellenamos los "nulls" de cada pregunta con los datos del formulario
     const preguntasCompletas = preguntas.map(p => ({
       ...p,
       areaConocimiento: area,
@@ -79,12 +76,11 @@ export const ReactivoForm: React.FC = () => {
       autorId: autorActual
     }));
 
-    // Armamos el paquete maestro sin nulls
     const propuestaFinal = { 
       titulo, 
       area, 
-      dificultad, // Enviamos la dificultad general
-      autorId: autorActual, // Enviamos el autor general
+      dificultad, 
+      autorId: autorActual, 
       estado: "PENDIENTE",
       preguntas: preguntasCompletas 
     };
@@ -92,7 +88,9 @@ export const ReactivoForm: React.FC = () => {
     try {
       await api.post('/evaluaciones', propuestaFinal);
       setMensaje({ texto: '¡Propuesta enviada con éxito al Panel de Admin!', tipo: 'success' });
-      setTitulo(''); setArea(''); setDificultad('Media');
+      setTitulo(''); 
+      setArea('Bases de Datos'); // Reiniciamos al valor por defecto
+      setDificultad('Media');
       setPreguntas([{ enunciado: '', opciones: [{ texto: '', esCorrecta: true }, { texto: '', esCorrecta: false }, { texto: '', esCorrecta: false }] }]);
     } catch (err: any) {
       setMensaje({ texto: 'Hubo un error al enviar tu propuesta. Verifica tu conexión.', tipo: 'error' });
@@ -105,15 +103,31 @@ export const ReactivoForm: React.FC = () => {
     <Card titulo="Proponer Nueva Evaluación (Crowdsourcing)">
       <div style={{ marginBottom: '20px', color: '#000' }}>
         <Input label="Título de la Evaluación" placeholder="Ej. Programación Concurrente" value={titulo} onChange={(e) => setTitulo(e.target.value)} />
-        <Input label="Área Académica" placeholder="Ej. Computación, Matemáticas..." value={area} onChange={(e) => setArea(e.target.value)} />
         
-        {/* NUEVO: Desplegable de Dificultad */}
+        {/* 2. NUEVO: Desplegable de Área Académica estrictamente ligada al Radar */}
+        <div style={{ marginTop: '15px' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#444' }}>Área Académica</label>
+          <select 
+            value={area} 
+            onChange={(e) => setArea(e.target.value)}
+            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd', backgroundColor: '#f9f9f9', fontSize: '15px', color: '#1a1a1a' }}
+          >
+            <option value="Bases de Datos">Bases de Datos</option>
+            <option value="Estructuras">Estructuras</option>
+            <option value="POO">POO</option>
+            <option value="Algoritmos">Algoritmos</option>
+            <option value="Redes">Redes</option>
+            <option value="Software">Software</option>
+          </select>
+        </div>
+        
+        {/* Desplegable de Dificultad */}
         <div style={{ marginTop: '15px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#444' }}>Dificultad</label>
           <select 
             value={dificultad} 
             onChange={(e) => setDificultad(e.target.value)}
-            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd', backgroundColor: '#f9f9f9', fontSize: '15px' }}
+           style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd', backgroundColor: '#f9f9f9', fontSize: '15px', color: '#1a1a1a' }}
           >
             <option value="Fácil">Fácil</option>
             <option value="Media">Media</option>
@@ -150,7 +164,7 @@ export const ReactivoForm: React.FC = () => {
 
       <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
         <Button label="+ Agregar otra pregunta" onClick={agregarPregunta} variant="secondary" />
-        <Button label={loading ? "Enviando..." : "Enviar Propuesta Completa"} onClick={enviarPropuesta} disabled={loading || !titulo || !area || preguntas[0].enunciado === ''} />
+        <Button label={loading ? "Enviando..." : "Enviar Propuesta Completa"} onClick={enviarPropuesta} disabled={loading || !titulo || preguntas[0].enunciado === ''} />
       </div>
     </Card>
   );

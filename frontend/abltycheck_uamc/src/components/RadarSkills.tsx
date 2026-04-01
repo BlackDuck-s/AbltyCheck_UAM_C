@@ -1,88 +1,97 @@
 import React from 'react';
 import {
-  Chart as ChartJS,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { Radar } from 'react-chartjs-2';
-import { Card } from './Card';
+  Radar, RadarChart, PolarGrid, 
+  PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer 
+} from 'recharts';
 
-ChartJS.register(
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend
-);
+// 1. AQUÍ EXPORTAMOS LA INTERFAZ EXACTA QUE NECESITA LA OTRA PÁGINA
+export interface ResultadoHistorico {
+  id: string;
+  titulo: string;
+  area: string;
+  calificacion: number;
+  fecha: string;
+}
 
-export const RadarSkills: React.FC = () => {
-  const data = {
-    labels: [
-      'Bases de Datos',
-      'Estructuras',
-      'POO',
-      'Algoritmos',
-      'Redes',
-      'Software',
-    ],
-    datasets: [
-      {
-        label: 'Tu Dominio (%)',
-        data: [75, 90, 85, 60, 70, 80],
-        backgroundColor: 'rgba(125, 95, 255, 0.2)',
-        borderColor: '#7d5fff',
-        borderWidth: 2,
-        pointBackgroundColor: '#7d5fff',
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: '#7d5fff',
-      },
-    ],
+// 2. LE DECIMOS A REACT QUE ESTE COMPONENTE RECIBE UN ARREGLO DE ESOS DATOS
+interface Props {
+  datos: ResultadoHistorico[];
+}
+
+// 3. RECIBIMOS LOS "datos" EN EL COMPONENTE
+export const RadarSkills: React.FC<Props> = ({ datos }) => {
+  
+  const AREAS_UAM = [
+    'Bases de Datos', 
+    'Estructuras', 
+    'POO', 
+    'Algoritmos', 
+    'Redes', 
+    'Software'
+  ];
+
+  const procesarDatosParaRadar = () => {
+    // Si no hay datos (aún está cargando), devolvemos el radar en 0
+    if (!datos || datos.length === 0) {
+      return AREAS_UAM.map(area => ({ subject: area, A: 0, fullMark: 100 }));
+    }
+
+    return AREAS_UAM.map(area => {
+      const examenesArea = datos.filter(d => d.area === area);
+      const promedio = examenesArea.length > 0 
+        ? examenesArea.reduce((acc, curr) => acc + curr.calificacion, 0) / examenesArea.length
+        : 0;
+
+      return {
+        subject: area,
+        A: promedio,
+        fullMark: 100,
+      };
+    });
   };
 
-  const options = {
-    scales: {
-      r: {
-        angleLines: {
-          display: true,
-          color: '#eee',
-        },
-        suggestedMin: 0,
-        suggestedMax: 100,
-        ticks: {
-          stepSize: 25,
-          color: '#999',
-          backdropColor: 'transparent',
-        },
-        pointLabels: {
-          color: '#333',
-          font: {
-            size: 14,
-            weight: 'bold' as const,
-          },
-        },
-      },
-    },
-    plugins: {
-      legend: {
-        display: false,
-      },
-    },
-  };
+  const chartData = procesarDatosParaRadar();
 
   return (
-    <Card titulo="Habilidades por Área">
-      <p style={{ color: '#666', marginBottom: '20px', marginTop: 0 }}>
-        Tu dominio en cada materia
+    <div style={{ 
+      width: '100%', 
+      height: '400px', 
+      backgroundColor: 'white', 
+      borderRadius: '20px', 
+      padding: '20px',
+      boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+    }}>
+      <h3 style={{ color: '#1a1a1a', marginBottom: '20px', textAlign: 'center' }}>
+        Habilidades por Área
+      </h3>
+      
+      <ResponsiveContainer width="100%" height="100%">
+        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
+          <PolarGrid stroke="#eee" />
+          <PolarAngleAxis 
+            dataKey="subject" 
+            tick={{ fill: '#666', fontSize: 12, fontWeight: 'bold' }} 
+          />
+          <PolarRadiusAxis 
+            angle={30} 
+            domain={[0, 100]} 
+            tick={false} 
+            axisLine={false} 
+          />
+          <Radar
+            name="Mi Nivel"
+            dataKey="A"
+            stroke="#7d5fff"
+            strokeWidth={3}
+            fill="#7d5fff"
+            fillOpacity={0.2}
+          />
+        </RadarChart>
+      </ResponsiveContainer>
+      
+      <p style={{ textAlign: 'center', color: '#999', fontSize: '12px', marginTop: '10px' }}>
+        Tu dominio en cada materia basado en tus últimos exámenes.
       </p>
-      <div style={{ padding: '10px', maxWidth: '500px', margin: '0 auto' }}>
-        <Radar data={data} options={options} />
-      </div>
-    </Card>
+    </div>
   );
 };
