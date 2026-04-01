@@ -26,6 +26,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({ alFinalizar, alIrALogin 
     try {
       await api.post('/auth/register', datos);
       alert("¡Cuenta creada con éxito! Ahora puedes iniciar sesión.");
+      alFinalizar();
       alIrALogin(); 
     } catch (err: any) {
       console.error("Error al registrar:", err);
@@ -67,7 +68,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({ alFinalizar, alIrALogin 
               <label style={labelStyle}>Nombre Completo</label>
               <input 
                 type="text" 
-                placeholder="Ej. Max" 
+                placeholder="Ej. Edgar Morales Garcia" 
                 style={inputStyle} 
                 value={datos.nombre}
                 onChange={(e) => setDatos({...datos, nombre: e.target.value})}
