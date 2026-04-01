@@ -9,32 +9,34 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
-import java.io.InputStream;
+import java.io.IOException;
 
 @Configuration
 public class FirebaseConfig {
+
     @PostConstruct
     public void init() {
         try {
-            InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("serviceAccount.json");
-
-            if (serviceAccount == null) {
-                throw new RuntimeException("No se encontró el archivo de credenciales de Firebase");
-            }
-            FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                    .build();
+            // Verificamos si Firebase ya fue inicializado para evitar errores si Spring Boot reinicia el contexto
             if (FirebaseApp.getApps().isEmpty()) {
+
+                // Con esto, Firebase buscará automáticamente la variable de entorno GOOGLE_APPLICATION_CREDENTIALS
+                FirebaseOptions options = FirebaseOptions.builder()
+                        .setCredentials(GoogleCredentials.getApplicationDefault())
+                        .build();
+
                 FirebaseApp.initializeApp(options);
+                System.out.println("🔥 ¡Firebase inicializado correctamente con ApplicationDefault!");
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
+            System.err.println("❌ ERROR: No se pudieron cargar las credenciales de Firebase. Verifica la variable GOOGLE_APPLICATION_CREDENTIALS.");
             e.printStackTrace();
         }
     }
 
     @Bean
     public Firestore firestore() {
+        // Como ya nos aseguramos de que FirebaseApp existe arriba en init(), esto ya no fallará
         return FirestoreClient.getFirestore();
     }
-
 }
