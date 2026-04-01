@@ -11,6 +11,7 @@ export interface ResultadoHistorico {
   area: string;
   calificacion: number;
   fecha: string;
+  dificultad?: string;
 }
 
 // 2. LE DECIMOS A REACT QUE ESTE COMPONENTE RECIBE UN ARREGLO DE ESOS DATOS
