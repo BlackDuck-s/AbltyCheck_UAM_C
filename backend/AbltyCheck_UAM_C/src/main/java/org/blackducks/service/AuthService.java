@@ -33,14 +33,22 @@ public class AuthService {
             throw new RuntimeException("La matrícula ya está registrada en el sistema");
         }
 
-        // 2. Crear el nuevo usuario (Por defecto, todos entran como ALUMNO)
-        Usuario nuevoUsuario = new Usuario(
-                UUID.randomUUID().toString(),
-                request.getMatricula(),
-                request.getEmail(),
-                passwordEncoder.encode(request.getPassword()),
-                "ALUMNO"
-        );
+        Usuario nuevoUsuario = new Usuario();
+        nuevoUsuario.setId(UUID.randomUUID().toString());
+        nuevoUsuario.setMatricula(request.getMatricula());
+        nuevoUsuario.setEmail(request.getEmail());
+        nuevoUsuario.setPassword(passwordEncoder.encode(request.getPassword()));
+        nuevoUsuario.setRol("ALUMNO");
+
+
+        // Atrapamos el nombre que viene desde el formulario de React
+        nuevoUsuario.setNombre(request.getNombre());
+
+        // Inyectamos valores por defecto para que la vista de Perfil no se rompa por datos null
+        nuevoUsuario.setBiografia("Estudiante de la UAM Cuajimalpa. ¡Listo para practicar y mejorar mis habilidades!");
+        nuevoUsuario.setCarrera("Ing. en Computación");
+        nuevoUsuario.setDivision("DCNI");
+        nuevoUsuario.setUnidad("UAM Cuajimalpa");
 
         // 3. Guardar en Firebase Firestore
         usuarioRepository.guardarUsuario(nuevoUsuario);

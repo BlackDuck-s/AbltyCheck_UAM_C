@@ -7,6 +7,8 @@ import com.google.cloud.firestore.QuerySnapshot;
 import org.blackducks.entity.Usuario;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -20,7 +22,6 @@ public class UsuarioRepository {
     }
 
     public Optional<Usuario> findByMatricula(String matricula) throws ExecutionException, InterruptedException {
-        // Realiza una consulta en Firebase buscando por el campo matricula
         ApiFuture<QuerySnapshot> future = firestore.collection("usuarios")
                 .whereEqualTo("matricula", matricula)
                 .get();
@@ -34,5 +35,18 @@ public class UsuarioRepository {
 
     public void guardarUsuario(Usuario usuario) throws ExecutionException, InterruptedException {
         firestore.collection("usuarios").document(usuario.getId()).set(usuario).get();
+    }
+
+    // --- NUEVO MÉTODO PARA LOS RANKINGS ---
+    public List<Usuario> obtenerTodos() throws ExecutionException, InterruptedException {
+        ApiFuture<QuerySnapshot> future = firestore.collection("usuarios").get();
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+        List<Usuario> usuarios = new ArrayList<>();
+        for (QueryDocumentSnapshot document : documents) {
+            usuarios.add(document.toObject(Usuario.class));
+        }
+
+        return usuarios;
     }
 }

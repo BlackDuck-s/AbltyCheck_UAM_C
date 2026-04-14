@@ -21,12 +21,10 @@ public class ReactivoRepository {
         this.firestore = firestore;
     }
 
-    // Método para guardar una pregunta (Usando el objeto que Emilio arme con el Builder)
     public void guardarReactivo(Reactivo reactivo) throws ExecutionException, InterruptedException {
         firestore.collection("reactivos").document(reactivo.getId()).set(reactivo).get();
     }
 
-    // Método para buscar preguntas por área (ej. "POO", "Bases de Datos")
     public List<Reactivo> obtenerPorArea(String area) throws ExecutionException, InterruptedException {
         CollectionReference reactivos = firestore.collection("reactivos");
         ApiFuture<QuerySnapshot> query = reactivos.whereEqualTo("area", area).get();
@@ -36,5 +34,17 @@ public class ReactivoRepository {
             lista.add(document.toObject(Reactivo.class));
         }
         return lista;
+    }
+
+    public List<Reactivo> obtenerTodos() throws ExecutionException, InterruptedException {
+        ApiFuture<QuerySnapshot> future = firestore.collection("reactivos").get();
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+        List<Reactivo> reactivos = new ArrayList<>();
+        for (QueryDocumentSnapshot document : documents) {
+            reactivos.add(document.toObject(Reactivo.class));
+        }
+
+        return reactivos;
     }
 }
