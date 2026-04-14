@@ -1,33 +1,38 @@
 import { useState } from 'react';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
+import { AuthPage } from './pages/AuthPage';
 import { EntrenamientoPage } from './pages/EntrenamientoPage';
 import { PracticarPage } from './pages/PracticarPage';
-import { ReactivoForm } from './pages/ReactivoForm';
+import { ReactivoForm } from './components/specific/ReactivoForm';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 
 function App() {
   const [rol, setRol] = useState<'ALUMNO' | 'ADMIN' | null>(null);
-  const [vistaAuth, setVistaAuth] = useState<'LOGIN' | 'REGISTER'>('LOGIN');
   const [vista, setVista] = useState<'PANEL' | 'PRACTICAR' | 'CROWD' | 'ADMIN'>('PANEL');
 
+  // Si no hay rol (usuario no logueado), mostramos la página de Autenticación
   if (!rol) {
-    return vistaAuth === 'LOGIN' 
-      ? <LoginPage alEntrar={(r) => { setRol(r); setVista(r === 'ADMIN' ? 'ADMIN' : 'PANEL'); }} alIrARegistro={() => setVistaAuth('REGISTER')} />
-      : <RegisterPage alFinalizar={() => setVistaAuth('LOGIN')} alIrALogin={() => setVistaAuth('LOGIN')} />;
+    return (
+      <AuthPage
+        onLoginSuccess={(r) => {
+          setRol(r);
+          setVista(r === 'ADMIN' ? 'ADMIN' : 'PANEL');
+        }}
+      />
+    );
   }
 
+  // Si hay rol (usuario logueado), mostramos la plataforma
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: '#f4f7f6' }}>
-      
+
       {/* SIDEBAR FIJA */}
-      <aside style={{ 
-        width: '260px', 
-        minWidth: '260px', 
-        backgroundColor: '#7d5fff', 
-        padding: '20px', 
-        display: 'flex', 
-        flexDirection: 'column', 
+      <aside style={{
+        width: '260px',
+        minWidth: '260px',
+        backgroundColor: '#7d5fff',
+        padding: '20px',
+        display: 'flex',
+        flexDirection: 'column',
         boxSizing: 'border-box',
         height: '100vh'
       }}>
@@ -40,15 +45,23 @@ function App() {
             <button onClick={() => setVista('ADMIN')} style={navBtnStyle(vista === 'ADMIN')}>🛡️ Panel Admin</button>
           )}
         </nav>
-        <button onClick={() => setRol(null)} style={logoutBtnStyle}>Cerrar Sesión</button>
+        <button
+          onClick={() => {
+            setRol(null);
+            localStorage.removeItem('jwt_token'); // Limpiamos el token por seguridad
+          }}
+          style={logoutBtnStyle}
+        >
+          Cerrar Sesión
+        </button>
       </aside>
 
       {/* CONTENIDO PRINCIPAL SCROLLEABLE */}
-      <main style={{ 
-        flex: 1, 
-        height: '100vh', 
-        overflowY: 'auto', 
-        padding: '40px', 
+      <main style={{
+        flex: 1,
+        height: '100vh',
+        overflowY: 'auto',
+        padding: '40px',
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
@@ -65,6 +78,7 @@ function App() {
   );
 }
 
+// ESTILOS EN LÍNEA
 const navBtnStyle = (activo: boolean) => ({
   backgroundColor: activo ? 'rgba(255,255,255,0.2)' : 'transparent',
   color: 'white',

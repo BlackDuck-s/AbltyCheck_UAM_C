@@ -1,7 +1,7 @@
 import React from 'react';
 import {
-  Radar, RadarChart, PolarGrid, 
-  PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer 
+  Radar, RadarChart, PolarGrid,
+  PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer
 } from 'recharts';
 
 // 1. AQUÍ EXPORTAMOS LA INTERFAZ EXACTA QUE NECESITA LA OTRA PÁGINA
@@ -21,13 +21,13 @@ interface Props {
 
 // 3. RECIBIMOS LOS "datos" EN EL COMPONENTE
 export const RadarSkills: React.FC<Props> = ({ datos }) => {
-  
+
   const AREAS_UAM = [
-    'Bases de Datos', 
-    'Estructuras', 
-    'POO', 
-    'Algoritmos', 
-    'Redes', 
+    'Bases de Datos',
+    'Estructuras',
+    'POO',
+    'Algoritmos',
+    'Redes',
     'Software'
   ];
 
@@ -39,7 +39,7 @@ export const RadarSkills: React.FC<Props> = ({ datos }) => {
 
     return AREAS_UAM.map(area => {
       const examenesArea = datos.filter(d => d.area === area);
-      const promedio = examenesArea.length > 0 
+      const promedio = examenesArea.length > 0
         ? examenesArea.reduce((acc, curr) => acc + curr.calificacion, 0) / examenesArea.length
         : 0;
 
@@ -54,30 +54,30 @@ export const RadarSkills: React.FC<Props> = ({ datos }) => {
   const chartData = procesarDatosParaRadar();
 
   return (
-    <div style={{ 
-      width: '100%', 
-      height: '400px', 
-      backgroundColor: 'white', 
-      borderRadius: '20px', 
+    <div style={{
+      width: '100%',
+      height: '400px',
+      backgroundColor: 'white',
+      borderRadius: '20px',
       padding: '20px',
       boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
     }}>
       <h3 style={{ color: '#1a1a1a', marginBottom: '20px', textAlign: 'center' }}>
         Habilidades por Área
       </h3>
-      
+
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
           <PolarGrid stroke="#eee" />
-          <PolarAngleAxis 
-            dataKey="subject" 
-            tick={{ fill: '#666', fontSize: 12, fontWeight: 'bold' }} 
+          <PolarAngleAxis
+            dataKey="subject"
+            tick={{ fill: '#666', fontSize: 12, fontWeight: 'bold' }}
           />
-          <PolarRadiusAxis 
-            angle={30} 
-            domain={[0, 100]} 
-            tick={false} 
-            axisLine={false} 
+          <PolarRadiusAxis
+            angle={30}
+            domain={[0, 100]}
+            tick={false}
+            axisLine={false}
           />
           <Radar
             name="Mi Nivel"
@@ -89,7 +89,7 @@ export const RadarSkills: React.FC<Props> = ({ datos }) => {
           />
         </RadarChart>
       </ResponsiveContainer>
-      
+
       <p style={{ textAlign: 'center', color: '#999', fontSize: '12px', marginTop: '10px' }}>
         Tu dominio en cada materia basado en tus últimos exámenes.
       </p>

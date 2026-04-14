@@ -13,17 +13,17 @@ export const LoginPage: React.FC<LoginProps> = ({ alEntrar, alIrARegistro }) => 
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); 
+    e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/login', { 
-        matricula: matricula, 
-        password: password 
+      const response = await api.post('/auth/login', {
+        matricula: matricula,
+        password: password
       });
 
-      const { token, rol } = response.data; 
+      const { token, rol } = response.data;
       localStorage.setItem('jwt_token', token);
       alEntrar(rol as 'ALUMNO' | 'ADMIN');
 
@@ -57,10 +57,10 @@ export const LoginPage: React.FC<LoginProps> = ({ alEntrar, alIrARegistro }) => 
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: '20px' }}>
               <label style={labelStyle}>Matrícula Universitaria</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 required
-                placeholder="Ej. 2193000000" 
+                placeholder="Ej. 2193000000"
                 style={inputStyle}
                 value={matricula}
                 onChange={(e) => setMatricula(e.target.value)}
@@ -69,10 +69,10 @@ export const LoginPage: React.FC<LoginProps> = ({ alEntrar, alIrARegistro }) => 
 
             <div style={{ marginBottom: '30px' }}>
               <label style={labelStyle}>Contraseña</label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 required
-                placeholder="••••••••" 
+                placeholder="••••••••"
                 style={inputStyle}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -86,8 +86,8 @@ export const LoginPage: React.FC<LoginProps> = ({ alEntrar, alIrARegistro }) => 
             )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={loading}
                 style={{ ...mainButtonStyle, opacity: loading ? 0.7 : 1 }}
               >

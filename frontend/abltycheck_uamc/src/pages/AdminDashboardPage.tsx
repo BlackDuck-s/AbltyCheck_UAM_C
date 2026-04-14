@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 import api from '../config/axiosConfig'; // Nuestro puente de comunicación
 
 // Ajustamos la interfaz para que coincida con lo que devuelve tu backend
@@ -10,8 +10,8 @@ interface PropuestaPendiente {
   area: string;
   estado: string;
   // Si tu backend no devuelve autor o fecha por ahora, los dejamos como opcionales
-  autor?: string; 
-  fecha?: string; 
+  autor?: string;
+  fecha?: string;
 }
 
 export const AdminDashboardPage: React.FC = () => {
@@ -42,9 +42,9 @@ export const AdminDashboardPage: React.FC = () => {
     try {
       // Hacemos la petición PUT para cambiar el estado en Firebase
       await api.put(`/evaluaciones/${id}/estado?estado=${nuevoEstado}`);
-      
+
       alert(`Evaluación ${nuevoEstado} con éxito.`);
-      
+
       // Quitamos la evaluación de la tabla visualmente
       setListaPendientes(listaPendientes.filter(item => item.id !== id));
     } catch (err) {
@@ -88,14 +88,14 @@ export const AdminDashboardPage: React.FC = () => {
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <Button 
-                        label="Aprobar" 
-                        onClick={() => manejarEstado(item.id, 'APROBADA')} 
+                      <Button
+                        label="Aprobar"
+                        onClick={() => manejarEstado(item.id, 'APROBADA')}
                       />
-                      <Button 
-                        label="Rechazar" 
-                        onClick={() => manejarEstado(item.id, 'RECHAZADA')} 
-                        variant="secondary" 
+                      <Button
+                        label="Rechazar"
+                        onClick={() => manejarEstado(item.id, 'RECHAZADA')}
+                        variant="secondary"
                       />
                     </div>
                   </td>

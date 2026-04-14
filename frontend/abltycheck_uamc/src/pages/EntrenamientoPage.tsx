@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 import api from '../config/axiosConfig';
 // 1. Aquí ya estamos importando la interfaz oficial. ¡Perfecto!
-import { RadarSkills, type ResultadoHistorico } from '../components/RadarSkills';
+import { RadarSkills, type ResultadoHistorico } from '../components/specific/RadarSkills';
 
 export const EntrenamientoPage: React.FC = () => {
   const [historial, setHistorial] = useState<ResultadoHistorico[]>([]);
@@ -32,7 +32,7 @@ export const EntrenamientoPage: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', animation: 'fadeIn 0.5s' }}>
-      
+
       {/* SECCIÓN DE RADAR: Le pasamos el historial para que calcule los promedios */}
       <section>
         <RadarSkills datos={historial} />
@@ -45,7 +45,7 @@ export const EntrenamientoPage: React.FC = () => {
           </h3>
           <span style={{ color: '#7d5fff', fontWeight: 'bold', cursor: 'pointer', fontSize: '14px' }}>Ver todo el historial</span>
         </div>
-        
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
           {loading ? (
             <p style={{ textAlign: 'center', gridColumn: '1/-1', color: '#666' }}>Cargando tu progreso...</p>
@@ -60,20 +60,20 @@ export const EntrenamientoPage: React.FC = () => {
                   <div style={{ marginTop: '10px' }}>
                     <label style={{ display: 'block', marginBottom: '5px' }}><strong>Puntaje:</strong> {test.calificacion.toFixed(1)}%</label>
                     <div style={{ width: '100%', backgroundColor: '#eee', borderRadius: '10px', height: '8px' }}>
-                      <div style={{ 
-                        width: `${test.calificacion}%`, 
-                        backgroundColor: test.calificacion >= 80 ? '#58eb9f' : test.calificacion >= 60 ? '#ffc107' : '#ff4d4d', 
-                        height: '100%', 
+                      <div style={{
+                        width: `${test.calificacion}%`,
+                        backgroundColor: test.calificacion >= 80 ? '#58eb9f' : test.calificacion >= 60 ? '#ffc107' : '#ff4d4d',
+                        height: '100%',
                         borderRadius: '10px',
                         transition: 'width 1s ease-in-out'
                       }}></div>
                     </div>
                   </div>
                 </div>
-                <Button 
-                  label="Revisar Detalles" 
+                <Button
+                  label="Revisar Detalles"
                   variant="secondary"
-                  onClick={() => alert("Próximamente: Reporte detallado de respuestas.")} 
+                  onClick={() => alert("Próximamente: Reporte detallado de respuestas.")}
                 />
               </Card>
             ))
@@ -86,13 +86,13 @@ export const EntrenamientoPage: React.FC = () => {
       </section>
 
       {/* BANNER DE ACCIÓN */}
-      <div style={{ 
-        backgroundColor: '#7d5fff', 
-        padding: '30px', 
-        borderRadius: '20px', 
-        color: 'white', 
-        display: 'flex', 
-        justifyContent: 'space-between', 
+      <div style={{
+        backgroundColor: '#7d5fff',
+        padding: '30px',
+        borderRadius: '20px',
+        color: 'white',
+        display: 'flex',
+        justifyContent: 'space-between',
         alignItems: 'center',
         boxShadow: '0 10px 20px rgba(125, 95, 255, 0.3)'
       }}>
@@ -100,14 +100,14 @@ export const EntrenamientoPage: React.FC = () => {
           <h3 style={{ margin: 0 }}>¿Listo para mejorar tu score?</h3>
           <p style={{ margin: '5px 0 0 0', opacity: 0.9 }}>Inicia una nueva evaluación basada en tus áreas débiles.</p>
         </div>
-        <button style={{ 
-          backgroundColor: '#58eb9f', 
-          color: '#1a1a1a', 
-          border: 'none', 
-          padding: '12px 25px', 
-          borderRadius: '12px', 
-          fontWeight: 'bold', 
-          cursor: 'pointer' 
+        <button style={{
+          backgroundColor: '#58eb9f',
+          color: '#1a1a1a',
+          border: 'none',
+          padding: '12px 25px',
+          borderRadius: '12px',
+          fontWeight: 'bold',
+          cursor: 'pointer'
         }}>
           Nueva Evaluación
         </button>

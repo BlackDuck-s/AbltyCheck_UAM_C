@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
-import { Input } from '../components/Input';
-import api from '../config/axiosConfig'; 
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import api from '../config/axiosConfig';
 import { ResolverExamenPage } from './ResolverExamenPage';
 
 interface EvaluacionPractica {
@@ -10,14 +10,14 @@ interface EvaluacionPractica {
   titulo: string;
   area: string;
   estado: string;
-  dificultad?: string; 
+  dificultad?: string;
 }
 
 export const PracticarPage: React.FC = () => {
   const [busqueda, setBusqueda] = useState('');
   const [evaluaciones, setEvaluaciones] = useState<EvaluacionPractica[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Este es nuestro "switch" para cambiar de pantalla
   const [examenActivoId, setExamenActivoId] = useState<string | null>(null);
 
@@ -38,7 +38,7 @@ export const PracticarPage: React.FC = () => {
     }
   };
 
-  const evaluacionesFiltradas = evaluaciones.filter(eva => 
+  const evaluacionesFiltradas = evaluaciones.filter(eva =>
     eva.titulo?.toLowerCase().includes(busqueda.toLowerCase()) ||
     eva.area?.toLowerCase().includes(busqueda.toLowerCase())
   );
@@ -48,8 +48,8 @@ export const PracticarPage: React.FC = () => {
     <>
       {examenActivoId ? (
         /* PANTALLA 1: Si hay un ID activo, mostramos el examen */
-        <ResolverExamenPage 
-          evaluacionId={examenActivoId} 
+        <ResolverExamenPage
+          evaluacionId={examenActivoId}
           alTerminar={() => setExamenActivoId(null)} // Esto apaga el ID y nos regresa a la lista
         />
       ) : (
@@ -61,7 +61,7 @@ export const PracticarPage: React.FC = () => {
           </header>
 
           <div style={{ marginBottom: '40px', maxWidth: '600px' }}>
-            <Input 
+            <Input
               label="Buscar por materia o área académica"
               placeholder="Ej. Redes, Bases de Datos, POO..."
               value={busqueda}
@@ -81,9 +81,9 @@ export const PracticarPage: React.FC = () => {
                     <p><strong>Área:</strong> {eva.area}</p>
                     <p><strong>Nivel:</strong> {eva.dificultad || 'Licenciatura'}</p>
                   </div>
-                  <Button 
-                    label="Empezar Test" 
-                    onClick={() => setExamenActivoId(eva.id)} 
+                  <Button
+                    label="Empezar Test"
+                    onClick={() => setExamenActivoId(eva.id)}
                   />
                 </Card>
               ))

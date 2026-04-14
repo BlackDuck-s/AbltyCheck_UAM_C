@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
-import { Input } from '../components/Input';
-import api from '../config/axiosConfig';
+import { Card } from "../ui/Card";
+import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
+import api from '../../config/axiosConfig';
 
 interface Opcion {
   texto: string;
@@ -20,8 +20,8 @@ interface Reactivo {
 export const ReactivoForm: React.FC = () => {
   const [titulo, setTitulo] = useState('');
   // 1. Ponemos un valor por defecto que coincida con tu radar
-  const [area, setArea] = useState('Bases de Datos'); 
-  const [dificultad, setDificultad] = useState('Media'); 
+  const [area, setArea] = useState('Bases de Datos');
+  const [dificultad, setDificultad] = useState('Media');
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
 
@@ -34,7 +34,7 @@ export const ReactivoForm: React.FC = () => {
     if (!token) return 'Anónimo';
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.sub || 'Anónimo'; 
+      return payload.sub || 'Anónimo';
     } catch (e) {
       return 'Anónimo';
     }
@@ -76,19 +76,19 @@ export const ReactivoForm: React.FC = () => {
       autorId: autorActual
     }));
 
-    const propuestaFinal = { 
-      titulo, 
-      area, 
-      dificultad, 
-      autorId: autorActual, 
+    const propuestaFinal = {
+      titulo,
+      area,
+      dificultad,
+      autorId: autorActual,
       estado: "PENDIENTE",
-      preguntas: preguntasCompletas 
+      preguntas: preguntasCompletas
     };
 
     try {
       await api.post('/evaluaciones', propuestaFinal);
       setMensaje({ texto: '¡Propuesta enviada con éxito al Panel de Admin!', tipo: 'success' });
-      setTitulo(''); 
+      setTitulo('');
       setArea('Bases de Datos'); // Reiniciamos al valor por defecto
       setDificultad('Media');
       setPreguntas([{ enunciado: '', opciones: [{ texto: '', esCorrecta: true }, { texto: '', esCorrecta: false }, { texto: '', esCorrecta: false }] }]);
@@ -103,12 +103,12 @@ export const ReactivoForm: React.FC = () => {
     <Card titulo="Proponer Nueva Evaluación (Crowdsourcing)">
       <div style={{ marginBottom: '20px', color: '#000' }}>
         <Input label="Título de la Evaluación" placeholder="Ej. Programación Concurrente" value={titulo} onChange={(e) => setTitulo(e.target.value)} />
-        
+
         {/* 2. NUEVO: Desplegable de Área Académica estrictamente ligada al Radar */}
         <div style={{ marginTop: '15px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#444' }}>Área Académica</label>
-          <select 
-            value={area} 
+          <select
+            value={area}
             onChange={(e) => setArea(e.target.value)}
             style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd', backgroundColor: '#f9f9f9', fontSize: '15px', color: '#1a1a1a' }}
           >
@@ -120,14 +120,14 @@ export const ReactivoForm: React.FC = () => {
             <option value="Software">Software</option>
           </select>
         </div>
-        
+
         {/* Desplegable de Dificultad */}
         <div style={{ marginTop: '15px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px', color: '#444' }}>Dificultad</label>
-          <select 
-            value={dificultad} 
+          <select
+            value={dificultad}
             onChange={(e) => setDificultad(e.target.value)}
-           style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd', backgroundColor: '#f9f9f9', fontSize: '15px', color: '#1a1a1a' }}
+            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd', backgroundColor: '#f9f9f9', fontSize: '15px', color: '#1a1a1a' }}
           >
             <option value="Fácil">Fácil</option>
             <option value="Media">Media</option>
