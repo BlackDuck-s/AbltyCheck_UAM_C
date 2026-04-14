@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router";
+import { NavLink, useNavigate } from "react-router-dom"; // <-- Ojo: react-router-dom es la importación correcta
 import {
     BarChart3,
     BookOpen,
@@ -10,9 +10,9 @@ import {
     ChevronRight,
     Users,
     FileText,
-    Lightbulb,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "../../config/axiosConfig.ts";
 
 interface SidebarProps {
     isAdmin?: boolean;
@@ -25,9 +25,40 @@ interface NavItem {
     badge?: string;
 }
 
+// Interfaz para saber qué datos esperar del backend
+interface SidebarProfile {
+    nombre: string | null;
+    matricula: string;
+}
+
 export function Sidebar({ isAdmin = false }: SidebarProps) {
     const [collapsed, setCollapsed] = useState(false);
+    const [userData, setUserData] = useState<SidebarProfile | null>(null);
     const navigate = useNavigate();
+
+    // Efecto para ir por los datos del usuario en cuanto el Sidebar se pinta
+    useEffect(() => {
+        const fetchSidebarData = async () => {
+            try {
+                const response = await api.get('/usuarios/perfil');
+                setUserData(response.data);
+            } catch (error) {
+                console.error("Error al cargar datos del Sidebar:", error);
+            }
+        };
+        fetchSidebarData();
+    }, []);
+
+    // Lógica segura por si los datos aún no cargan o vienen nulos
+    const nombreSeguro = userData?.nombre || "Cargando...";
+    const matriculaSegura = userData?.matricula || "---";
+    const inicialSegura = userData?.nombre ? userData.nombre.charAt(0).toUpperCase() : <User className="w-6 h-6 text-white" />;
+
+    const handleLogout = () => {
+        // ¡Súper importante! Borrar el token para cerrar sesión de verdad
+        localStorage.removeItem('jwt_token');
+        navigate("/");
+    };
 
     const mainLinks: NavItem[] = isAdmin
         ? [
@@ -50,7 +81,7 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
     return (
         <aside
             className={`bg-white border-r border-gray-200/50 flex flex-col transition-all duration-300 ${collapsed ? "w-20" : "w-72"
-                }`}
+            }`}
         >
             {/* Header */}
             <div className="p-6 flex items-center justify-between border-b border-gray-100">
@@ -90,18 +121,23 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
                 </div>
             )}
 
-            {/* Profile */}
+            {/* Profile Dinámico */}
             <div className={`p-6 ${collapsed ? "flex justify-center" : ""}`}>
                 <div className={`flex items-center gap-3 ${collapsed ? "flex-col" : ""}`}>
                     <div className="w-12 h-12 bg-gradient-to-br from-[#F28224] to-[#D97120] rounded-full flex items-center justify-center flex-shrink-0">
-                        <User className="w-6 h-6 text-white" />
+                        {/* Mostramos la inicial o el ícono si no hay nombre */}
+                        {typeof inicialSegura === 'string' ? (
+                            <span className="text-white font-bold text-xl">{inicialSegura}</span>
+                        ) : (
+                            inicialSegura
+                        )}
                     </div>
                     {!collapsed && (
-                        <div>
-                            <p className="text-[#1D1D1B]" style={{ fontWeight: 600 }}>
-                                Black Friday
+                        <div className="flex-1 min-w-0">
+                            <p className="text-[#1D1D1B] truncate" style={{ fontWeight: 600 }}>
+                                {nombreSeguro}
                             </p>
-                            <p className="text-sm text-[#64748B]">2213028122</p>
+                            <p className="text-sm text-[#64748B] truncate">{matriculaSegura}</p>
                             {isAdmin && (
                                 <span
                                     className="inline-block mt-1 px-2 py-0.5 bg-[#F28224]/15 text-[#D97120] rounded-full text-xs"
@@ -133,9 +169,9 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
                             <>
                                 <link.icon
                                     className={`w-5 h-5 flex-shrink-0 ${isActive
-                                            ? "text-[#F28224]"
-                                            : "text-[#94A3B8] group-hover:text-[#64748B]"
-                                        }`}
+                                        ? "text-[#F28224]"
+                                        : "text-[#94A3B8] group-hover:text-[#64748B]"
+                                    }`}
                                 />
                                 {!collapsed && (
                                     <span style={{ fontWeight: 500 }} className="flex-1">
@@ -178,9 +214,9 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
                                 <>
                                     <link.icon
                                         className={`w-5 h-5 flex-shrink-0 ${isActive
-                                                ? "text-[#F28224]"
-                                                : "text-[#94A3B8] group-hover:text-[#64748B]"
-                                            }`}
+                                            ? "text-[#F28224]"
+                                            : "text-[#94A3B8] group-hover:text-[#64748B]"
+                                        }`}
                                     />
                                     {!collapsed && (
                                         <span style={{ fontWeight: 500 }}>{link.label}</span>
@@ -189,10 +225,12 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
                             )}
                         </NavLink>
                     ))}
+
+                {/* Botón de Cerrar Sesión Actualizado */}
                 <button
-                    onClick={() => navigate("/")}
+                    onClick={handleLogout}
                     className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[#64748B] hover:bg-[#FCA5A5]/10 hover:text-[#991B1B] transition-all w-full ${collapsed ? "justify-center" : ""
-                        }`}
+                    }`}
                 >
                     <LogOut className="w-5 h-5 flex-shrink-0" />
                     {!collapsed && (

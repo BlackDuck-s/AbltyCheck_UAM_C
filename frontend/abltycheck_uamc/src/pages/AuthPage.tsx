@@ -2,12 +2,16 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Hash, Eye, EyeOff, User } from "lucide-react";
 import api from "../config/axiosConfig";
+import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios"; // Importamos el tipo de error correcto
 
 interface AuthPageProps {
     onLoginSuccess: (rol: 'ALUMNO' | 'ADMIN') => void;
 }
 
 export function AuthPage({ onLoginSuccess }: AuthPageProps) {
+    const navigate = useNavigate(); // 👈 Inicializamos el hook aquí
+
     const [isLogin, setIsLogin] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
@@ -32,6 +36,10 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
                 const { token, rol } = response.data;
                 localStorage.setItem('jwt_token', token);
                 onLoginSuccess(rol as 'ALUMNO' | 'ADMIN');
+
+                // 👈 Usamos el navigate para ir al perfil
+                navigate("/profile");
+
             } else {
                 if (registerData.password !== registerData.confirmPassword) {
                     setError("Las contraseñas no coinciden");
@@ -39,13 +47,19 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
                     return;
                 }
                 await api.post('/auth/register', {
-                    matricula: registerData.matricula, nombre: registerData.nombre, email: registerData.email, password: registerData.password, rol: 'ALUMNO'
+                    matricula: registerData.matricula,
+                    nombre: registerData.nombre,
+                    email: registerData.email,
+                    password: registerData.password,
+                    rol: 'ALUMNO'
                 });
                 alert("¡Cuenta creada con éxito! Ahora puedes iniciar sesión.");
                 setIsLogin(true);
             }
-        } catch (err: any) {
-            setError(err.response?.data?.mensaje || 'Credenciales inválidas o error de conexión.');
+        } catch (err) {
+            // 👈 Tipamos el error correctamente en lugar de usar 'any'
+            const axiosError = err as AxiosError<{ mensaje: string }>;
+            setError(axiosError.response?.data?.mensaje || 'Credenciales inválidas o error de conexión.');
         } finally {
             setLoading(false);
         }
@@ -115,12 +129,17 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
                             <div className="relative">
                                 <Hash className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input type="text" required value={isLogin ? loginData.matricula : registerData.matricula}
-                                    onChange={(e) => {
-                                        const val = e.target.value.replace(/\D/g, '');
-                                        isLogin ? setLoginData({ ...loginData, matricula: val }) : setRegisterData({ ...registerData, matricula: val });
-                                    }}
-                                    placeholder="Ej. 2193000000"
-                                    className="w-full pl-14 pr-5 py-4 bg-uam-bg border-2 border-gray-100 rounded-2xl focus:border-uam-orange focus:bg-white focus:outline-none transition-all text-lg font-sans text-uam-text"
+                                       onChange={(e) => {
+                                           const val = e.target.value.replace(/\D/g, '');
+                                           // 👈 Usamos if/else en vez de ternarios
+                                           if (isLogin) {
+                                               setLoginData({ ...loginData, matricula: val });
+                                           } else {
+                                               setRegisterData({ ...registerData, matricula: val });
+                                           }
+                                       }}
+                                       placeholder="Ej. 2193000000"
+                                       className="w-full pl-14 pr-5 py-4 bg-uam-bg border-2 border-gray-100 rounded-2xl focus:border-uam-orange focus:bg-white focus:outline-none transition-all text-lg font-sans text-uam-text"
                                 />
                             </div>
                         </div>
@@ -132,8 +151,8 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
                                     <div className="relative">
                                         <User className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                         <input type="text" required value={registerData.nombre} onChange={(e) => setRegisterData({ ...registerData, nombre: e.target.value })}
-                                            placeholder="Ej. Edgar Morales"
-                                            className="w-full pl-14 pr-5 py-4 bg-uam-bg border-2 border-gray-100 rounded-2xl focus:border-uam-orange focus:bg-white focus:outline-none transition-all text-lg font-sans text-uam-text"
+                                               placeholder="Ej. Edgar Morales"
+                                               className="w-full pl-14 pr-5 py-4 bg-uam-bg border-2 border-gray-100 rounded-2xl focus:border-uam-orange focus:bg-white focus:outline-none transition-all text-lg font-sans text-uam-text"
                                         />
                                     </div>
                                 </div>
@@ -142,8 +161,8 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
                                     <div className="relative">
                                         <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                         <input type="email" required value={registerData.email} onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                                            placeholder="correo@alumnos.uam.mx"
-                                            className="w-full pl-14 pr-5 py-4 bg-uam-bg border-2 border-gray-100 rounded-2xl focus:border-uam-orange focus:bg-white focus:outline-none transition-all text-lg font-sans text-uam-text"
+                                               placeholder="correo@alumnos.uam.mx"
+                                               className="w-full pl-14 pr-5 py-4 bg-uam-bg border-2 border-gray-100 rounded-2xl focus:border-uam-orange focus:bg-white focus:outline-none transition-all text-lg font-sans text-uam-text"
                                         />
                                     </div>
                                 </div>
@@ -155,9 +174,16 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
                             <div className="relative">
                                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input type={showPassword ? "text" : "password"} required value={isLogin ? loginData.password : registerData.password}
-                                    onChange={(e) => isLogin ? setLoginData({ ...loginData, password: e.target.value }) : setRegisterData({ ...registerData, password: e.target.value })}
-                                    placeholder="••••••••"
-                                    className="w-full pl-14 pr-14 py-4 bg-uam-bg border-2 border-gray-100 rounded-2xl focus:border-uam-orange focus:bg-white focus:outline-none transition-all text-lg font-sans text-uam-text"
+                                       onChange={(e) => {
+                                           // 👈 Usamos if/else en vez de ternarios
+                                           if (isLogin) {
+                                               setLoginData({ ...loginData, password: e.target.value });
+                                           } else {
+                                               setRegisterData({ ...registerData, password: e.target.value });
+                                           }
+                                       }}
+                                       placeholder="••••••••"
+                                       className="w-full pl-14 pr-14 py-4 bg-uam-bg border-2 border-gray-100 rounded-2xl focus:border-uam-orange focus:bg-white focus:outline-none transition-all text-lg font-sans text-uam-text"
                                 />
                                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
                                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -171,8 +197,8 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
                                 <div className="relative">
                                     <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                     <input type={showConfirm ? "text" : "password"} required value={registerData.confirmPassword} onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
-                                        placeholder="••••••••"
-                                        className="w-full pl-14 pr-14 py-4 bg-uam-bg border-2 border-gray-100 rounded-2xl focus:border-uam-orange focus:bg-white focus:outline-none transition-all text-lg font-sans text-uam-text"
+                                           placeholder="••••••••"
+                                           className="w-full pl-14 pr-14 py-4 bg-uam-bg border-2 border-gray-100 rounded-2xl focus:border-uam-orange focus:bg-white focus:outline-none transition-all text-lg font-sans text-uam-text"
                                     />
                                     <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
                                         {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -194,7 +220,7 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
 
                     <div className="mt-8 text-center">
                         <button type="button" onClick={() => { setIsLogin(!isLogin); setError(""); }} className="text-uam-orange hover:opacity-80 transition-colors font-medium cursor-pointer">
-                            {isLogin ? "¿No tienes cuenta? Regístrate aquí →" : "← Ya tengo cuenta, iniciar sesión"}
+                            {isLogin ? "¿No tienes cuenta? Regístrate aquí 👉" : "👈 Ya tengo cuenta, iniciar sesión"}
                         </button>
                     </div>
                 </motion.div>

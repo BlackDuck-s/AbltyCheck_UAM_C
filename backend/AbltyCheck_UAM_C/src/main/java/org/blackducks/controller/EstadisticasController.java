@@ -1,5 +1,6 @@
 package org.blackducks.controller;
 
+import org.blackducks.dto.HabitosYLogrosDTO;
 import org.blackducks.dto.RankingUsuarioDTO;
 import org.blackducks.service.EstadisticasService;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,18 @@ public class EstadisticasController {
         try {
             return ResponseEntity.ok(estadisticasService.obtenerTopCrowdsourcing(limit));
         } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/mis-habitos")
+    public ResponseEntity<HabitosYLogrosDTO> getMisHabitosYLogros(java.security.Principal principal) {
+        try {
+            String matricula = principal.getName(); // Extrae la matrícula del Token JWT
+            HabitosYLogrosDTO habitos = estadisticasService.obtenerHabitosYLogros(matricula);
+            return ResponseEntity.ok(habitos);
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).build();
         }
     }
