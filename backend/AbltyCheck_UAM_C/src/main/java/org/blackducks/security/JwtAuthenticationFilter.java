@@ -1,5 +1,7 @@
 package org.blackducks.security;
 
+import io.jsonwebtoken.ExpiredJwtException; // 👈 IMPORTANTE
+import io.jsonwebtoken.JwtException; // 👈 IMPORTANTE
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String matricula;
+        String matricula = null; // 👈 Lo cambiamos a String normal e inicializamos en null
 
         // 1. Verificamos si la petición tiene el header Authorization con "Bearer "
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -43,11 +45,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 2. Extraemos el token y la matrícula
         jwt = authHeader.substring(7);
-        matricula = jwtService.extractUsername(jwt);
 
-        // 3. Si hay matrícula y el usuario aún no está autenticado en este hilo
+        // 2. Extraemos el token y la matrícula (¡CON ESCUDO PROTECTOR!)
+        try {
+            matricula = jwtService.extractUsername(jwt);
+        } catch (ExpiredJwtException e) {
+            logger.warn("Seguridad: El JWT ha expirado. Forzando re-autenticación.");
+        } catch (JwtException e) {
+            logger.warn("Seguridad: El JWT es inválido o está malformado.");
+        } catch (Exception e) {
+            logger.error("Seguridad: Error inesperado al procesar el JWT.");
+        }
+
+        // 3. Si hay matrícula (el try tuvo éxito) y el usuario aún no está autenticado en este hilo
         if (matricula != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(matricula);
 
@@ -65,7 +76,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // 6. Continuamos con la cadena de filtros
+        // 6. Continuamos con la cadena de filtros.
+        // (Si el JWT expiró, pasará sin autenticación y Spring lo rebotará con un 401/403)
         filterChain.doFilter(request, response);
     }
 }

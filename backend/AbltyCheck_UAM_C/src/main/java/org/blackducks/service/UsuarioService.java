@@ -23,6 +23,20 @@ public class UsuarioService {
         this.resultadoRepository = resultadoRepository;
     }
 
+// --- MÉTODOS PARA EL PUT DE CONFIGURACIÓN ---
+
+    public Usuario obtenerPorMatricula(String matricula) throws ExecutionException, InterruptedException {
+        return usuarioRepository.findByMatricula(matricula)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con matrícula: " + matricula));
+    }
+
+    public void guardarUsuario(Usuario usuario) throws ExecutionException, InterruptedException {
+        // Llamamos al método que ya tienes en tu UsuarioRepository nativo
+        usuarioRepository.guardarUsuario(usuario);
+    }
+
+    // ---------------------------------------------------
+
     public UsuarioPerfilDTO obtenerPerfilPorMatricula(String matricula) throws ExecutionException, InterruptedException {
         Usuario usuario = usuarioRepository.findByMatricula(matricula)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -37,10 +51,13 @@ public class UsuarioService {
         perfilDTO.setDivision(usuario.getDivision());
         perfilDTO.setUnidad(usuario.getUnidad());
 
+        // ¡SÚPER IMPORTANTE! Pasarle la foto al DTO para que llegue a React
+        perfilDTO.setFotoUrl(usuario.getFotoUrl());
+
         // --- MAGIA DEL RADAR ---
         List<ResultadoHistorico> historial = resultadoRepository.obtenerPorUsuario(matricula);
 
-        // Agrupamos por Área (ej. "POO") y promediamos la calificación
+        // Agrupamos por área (ej. "POO") y promediamos la calificación
         Map<String, Double> radar = historial.stream()
                 .collect(Collectors.groupingBy(
                         ResultadoHistorico::getArea,

@@ -16,6 +16,7 @@ interface UsuarioPerfil {
     division: string | null;
     unidad: string | null;
     radarSkills: Record<string, number>;
+    fotoUrl?: string | null;
 }
 
 interface RankingUser {
@@ -105,8 +106,12 @@ export function ProfilePage() {
                             {/* Left: Avatar + Info */}
                             <div className="flex-1">
                                 <div className="flex items-center gap-6 mb-5">
-                                    <div className="w-24 h-24 bg-gradient-to-br from-[#F28224] to-[#D97120] rounded-full flex items-center justify-center shadow-lg shadow-[#F28224]/20 flex-shrink-0">
-                                        <span className="text-white text-4xl font-bold">{inicialSegura}</span>
+                                    <div className="w-24 h-24 bg-gradient-to-br from-[#F28224] to-[#D97120] rounded-full flex items-center justify-center shadow-lg shadow-[#F28224]/20 flex-shrink-0 overflow-hidden border-4 border-white">
+                                        {perfil.fotoUrl ? (
+                                            <img src={perfil.fotoUrl} alt="Perfil" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <span className="text-white text-4xl font-bold">{inicialSegura}</span>
+                                        )}
                                     </div>
                                     <div>
                                         <h1 className="text-2xl text-[#1D1D1B]" style={{ fontWeight: 700 }}>

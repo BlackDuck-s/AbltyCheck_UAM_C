@@ -10,11 +10,19 @@ public class UsuarioPerfilDTO {
     private String nombre;
     private String email;
     private String rol;
-
+    private String fotoUrl;
     // Datos del diseño de Figma
     private String biografia;
     private String carrera;
     private String division;
     private String unidad;
     private Map<String, Double> radarSkills;
+
+    public String getFotoUrl() {
+        return fotoUrl;
+    }
+
+    public void setFotoUrl(String fotoUrl) {
+        this.fotoUrl = fotoUrl;
+    }
 }

@@ -16,9 +16,17 @@ public class Usuario {
     private String email;
     private String password;
     private String rol;
-
+    private String fotoUrl;
     private String biografia;
     private String carrera;
     private String division;
     private String unidad;
+
+    public String getFotoUrl() {
+        return fotoUrl;
+    }
+
+    public void setFotoUrl(String fotoUrl) {
+        this.fotoUrl = fotoUrl;
+    }
 }

@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom"; // <-- Ojo: react-router-dom es la importación correcta
+import { NavLink, useNavigate } from "react-router-dom";
 import {
     BarChart3,
     BookOpen,
@@ -29,6 +29,7 @@ interface NavItem {
 interface SidebarProfile {
     nombre: string | null;
     matricula: string;
+    fotoUrl?: string | null;
 }
 
 export function Sidebar({ isAdmin = false }: SidebarProps) {
@@ -52,7 +53,14 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
     // Lógica segura por si los datos aún no cargan o vienen nulos
     const nombreSeguro = userData?.nombre || "Cargando...";
     const matriculaSegura = userData?.matricula || "---";
-    const inicialSegura = userData?.nombre ? userData.nombre.charAt(0).toUpperCase() : <User className="w-6 h-6 text-white" />;
+
+    const avatarContent = userData?.fotoUrl ? (
+        <img src={userData.fotoUrl} alt="Avatar" className="w-full h-full object-cover" />
+    ) : userData?.nombre ? (
+        userData.nombre.charAt(0).toUpperCase()
+    ) : (
+        <User className="w-6 h-6 text-white" />
+    );
 
     const handleLogout = () => {
         // ¡Súper importante! Borrar el token para cerrar sesión de verdad
@@ -124,12 +132,12 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
             {/* Profile Dinámico */}
             <div className={`p-6 ${collapsed ? "flex justify-center" : ""}`}>
                 <div className={`flex items-center gap-3 ${collapsed ? "flex-col" : ""}`}>
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#F28224] to-[#D97120] rounded-full flex items-center justify-center flex-shrink-0">
-                        {/* Mostramos la inicial o el ícono si no hay nombre */}
-                        {typeof inicialSegura === 'string' ? (
-                            <span className="text-white font-bold text-xl">{inicialSegura}</span>
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#F28224] to-[#D97120] rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm">
+                        {/* Mostramos la inicial, el ícono o la FOTO */}
+                        {typeof avatarContent === 'string' ? (
+                            <span className="text-white font-bold text-xl">{avatarContent}</span>
                         ) : (
-                            inicialSegura
+                            avatarContent
                         )}
                     </div>
                     {!collapsed && (
