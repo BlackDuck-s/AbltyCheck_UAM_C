@@ -40,4 +40,15 @@ public class ResultadoRepository {
 
         return resultados;
     }
+
+    // Añade este método a tu ResultadoRepository
+    public List<ResultadoHistorico> obtenerTodos() throws ExecutionException, InterruptedException {
+        ApiFuture<QuerySnapshot> future = firestore.collection("resultados").get();
+
+        List<ResultadoHistorico> historial = new ArrayList<>();
+        for (QueryDocumentSnapshot document : future.get().getDocuments()) {
+            historial.add(document.toObject(ResultadoHistorico.class));
+        }
+        return historial;
+    }
 }

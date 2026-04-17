@@ -49,4 +49,16 @@ public class UsuarioRepository {
 
         return usuarios;
     }
+
+    public List<Usuario> obtenerPorRol(String rol) throws ExecutionException, InterruptedException {
+        ApiFuture<QuerySnapshot> future = firestore.collection("usuarios")
+                .whereEqualTo("rol", rol)
+                .get();
+
+        List<Usuario> usuarios = new ArrayList<>();
+        for (QueryDocumentSnapshot document : future.get().getDocuments()) {
+            usuarios.add(document.toObject(Usuario.class));
+        }
+        return usuarios;
+    }
 }

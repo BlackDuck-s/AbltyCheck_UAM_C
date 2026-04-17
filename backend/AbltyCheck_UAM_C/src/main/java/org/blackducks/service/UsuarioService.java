@@ -1,5 +1,8 @@
 package org.blackducks.service;
 
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.QuerySnapshot;
 import org.blackducks.dto.UsuarioPerfilDTO;
 import org.blackducks.entity.ResultadoHistorico;
 import org.blackducks.entity.Usuario;
@@ -7,6 +10,7 @@ import org.blackducks.repository.ResultadoRepository;
 import org.blackducks.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -67,4 +71,5 @@ public class UsuarioService {
         perfilDTO.setRadarSkills(radar);
         return perfilDTO;
     }
+
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @Repository
@@ -46,5 +47,23 @@ public class ReactivoRepository {
         }
 
         return reactivos;
+    }
+
+    public List<Map<String, Object>> obtenerPendientes() throws ExecutionException, InterruptedException {
+        ApiFuture<QuerySnapshot> future = firestore.collection("evaluaciones")
+                .whereEqualTo("estado", "PENDIENTE")
+                .get();
+
+        List<Map<String, Object>> pendientes = new ArrayList<>();
+        for (QueryDocumentSnapshot document : future.get().getDocuments()) {
+            Map<String, Object> eval = document.getData();
+            eval.put("id", document.getId()); // Inyectamos el ID de Firestore
+            pendientes.add(eval);
+        }
+        return pendientes;
+    }
+
+    public void actualizarEstado(String id, String nuevoEstado) throws ExecutionException, InterruptedException {
+        firestore.collection("evaluaciones").document(id).update("estado", nuevoEstado).get();
     }
 }

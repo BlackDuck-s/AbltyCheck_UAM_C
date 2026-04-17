@@ -29,7 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             return User.builder()
                     .username(usuario.getMatricula())
                     .password(usuario.getPassword())
-                    .roles(usuario.getRol()) // Esto asignará ROLE_ALUMNO o ROLE_MODERADOR
+                    .authorities(usuario.getRol()) // Esto asignará ROLE_ALUMNO o ROLE_MODERADOR
                     .build();
 
         } catch (ExecutionException | InterruptedException e) {

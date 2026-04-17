@@ -71,8 +71,9 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
     const mainLinks: NavItem[] = isAdmin
         ? [
             { to: "/admin", icon: Shield, label: "Panel Admin" },
-            { to: "/questions", icon: BookOpen, label: "Preguntas" },
-            { to: "/progress", icon: BarChart3, label: "Estadísticas" },
+            { to: "/admin/crowdsourcing", icon: Users, label: "Aprobar Reactivos", badge: "Pendientes" },
+            { to: "/admin/stats", icon: BarChart3, label: "Estadísticas" },
+            { to: "/admin/materials", icon: BookOpen, label: "Subir Material" },
         ]
         : [
             { to: "/profile", icon: User, label: "Perfil" },

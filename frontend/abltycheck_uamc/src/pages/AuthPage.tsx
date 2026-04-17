@@ -3,14 +3,14 @@ import { motion } from "framer-motion";
 import { Mail, Lock, Hash, Eye, EyeOff, User } from "lucide-react";
 import api from "../config/axiosConfig";
 import { useNavigate } from "react-router-dom";
-import { AxiosError } from "axios"; // Importamos el tipo de error correcto
+import { AxiosError } from "axios";
 
 interface AuthPageProps {
     onLoginSuccess: (rol: 'ALUMNO' | 'ADMIN') => void;
 }
 
 export function AuthPage({ onLoginSuccess }: AuthPageProps) {
-    const navigate = useNavigate(); // 👈 Inicializamos el hook aquí
+    const navigate = useNavigate();
 
     const [isLogin, setIsLogin] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
@@ -37,8 +37,12 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
                 localStorage.setItem('jwt_token', token);
                 onLoginSuccess(rol as 'ALUMNO' | 'ADMIN');
 
-                // 👈 Usamos el navigate para ir al perfil
-                navigate("/profile");
+                // LÓGICA DE REDIRECCIÓN DINÁMICA BASADA EN EL ROL
+                if (rol === 'ADMIN') {
+                    navigate("/admin");
+                } else {
+                    navigate("/profile");
+                }
 
             } else {
                 if (registerData.password !== registerData.confirmPassword) {
@@ -57,7 +61,6 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
                 setIsLogin(true);
             }
         } catch (err) {
-            // 👈 Tipamos el error correctamente en lugar de usar 'any'
             const axiosError = err as AxiosError<{ mensaje: string }>;
             setError(axiosError.response?.data?.mensaje || 'Credenciales inválidas o error de conexión.');
         } finally {
@@ -105,7 +108,7 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
                     <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.6, type: "spring" }} className="mb-8">
                         <div className="w-28 h-28 bg-white/10 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg border border-white/10">
                             <div className="flex flex-col items-center">
-                                <span className="text-5xl leading-none">🐾</span>
+                                <span className="text-5xl leading-none">🦆</span>
                                 <span className="text-white/60 text-[9px] mt-1 font-medium">PANTERA</span>
                             </div>
                         </div>
@@ -131,7 +134,6 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
                                 <input type="text" required value={isLogin ? loginData.matricula : registerData.matricula}
                                        onChange={(e) => {
                                            const val = e.target.value.replace(/\D/g, '');
-                                           // 👈 Usamos if/else en vez de ternarios
                                            if (isLogin) {
                                                setLoginData({ ...loginData, matricula: val });
                                            } else {
@@ -175,7 +177,6 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
                                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input type={showPassword ? "text" : "password"} required value={isLogin ? loginData.password : registerData.password}
                                        onChange={(e) => {
-                                           // 👈 Usamos if/else en vez de ternarios
                                            if (isLogin) {
                                                setLoginData({ ...loginData, password: e.target.value });
                                            } else {
@@ -220,7 +221,7 @@ export function AuthPage({ onLoginSuccess }: AuthPageProps) {
 
                     <div className="mt-8 text-center">
                         <button type="button" onClick={() => { setIsLogin(!isLogin); setError(""); }} className="text-uam-orange hover:opacity-80 transition-colors font-medium cursor-pointer">
-                            {isLogin ? "¿No tienes cuenta? Regístrate aquí 👉" : "👈 Ya tengo cuenta, iniciar sesión"}
+                            {isLogin ? "¿No tienes cuenta? Regístrate aquí →" : "← Ya tengo cuenta, iniciar sesión"}
                         </button>
                     </div>
                 </motion.div>
