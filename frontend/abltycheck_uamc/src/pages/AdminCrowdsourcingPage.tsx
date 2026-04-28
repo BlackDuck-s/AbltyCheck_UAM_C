@@ -39,7 +39,7 @@ export function AdminCrowdsourcingPage() {
     }, []);
 
     // 2. Acción para Aprobar o Rechazar conectada al Backend
-    const handleAction = async (id: string, nuevoEstado: 'APROBADO' | 'RECHAZADO') => {
+    const handleAction = async (id: string, nuevoEstado: 'APROBADA' | 'RECHAZADO') => {
         try {
             // Llamada real al backend
             await api.put(`/admin/reactivos/${id}/estado`, { estado: nuevoEstado });
@@ -129,7 +129,7 @@ export function AdminCrowdsourcingPage() {
                                             </div>
 
                                             <div className="flex items-center gap-3">
-                                                <button onClick={(e) => { e.stopPropagation(); handleAction(propuesta.id, 'APROBADO'); }} className="px-5 py-2.5 bg-[#10B981]/10 text-[#10B981] hover:bg-[#10B981] hover:text-white rounded-xl font-bold transition-all flex items-center gap-2">
+                                                <button onClick={(e) => { e.stopPropagation(); handleAction(propuesta.id, 'APROBADA'); }} className="px-5 py-2.5 bg-[#10B981]/10 text-[#10B981] hover:bg-[#10B981] hover:text-white rounded-xl font-bold transition-all flex items-center gap-2">
                                                     <CheckCircle2 className="w-5 h-5" /> Aprobar
                                                 </button>
                                                 <button onClick={(e) => { e.stopPropagation(); handleAction(propuesta.id, 'RECHAZADO'); }} className="px-5 py-2.5 bg-[#EF4444]/10 text-[#EF4444] hover:bg-[#EF4444] hover:text-white rounded-xl font-bold transition-all flex items-center gap-2">

@@ -20,6 +20,10 @@ public class EvaluacionRepository {
         this.firestore = firestore;
     }
 
+    public Firestore getFirestore() {
+        return this.firestore;
+    }
+
     public void guardarEvaluacion(Evaluacion evaluacion) throws ExecutionException, InterruptedException {
         ApiFuture<WriteResult> future = firestore.collection(COLLECTION_NAME)
                 .document(evaluacion.getId())

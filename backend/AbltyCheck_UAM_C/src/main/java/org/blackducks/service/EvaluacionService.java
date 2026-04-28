@@ -1,5 +1,6 @@
 package org.blackducks.service;
 
+import com.google.cloud.firestore.Firestore;
 import org.blackducks.dto.RespuestaReactivoDTO;
 import org.blackducks.dto.ResultadoEvaluacionDTO;
 import org.blackducks.entity.*;
@@ -7,6 +8,9 @@ import org.blackducks.repository.EvaluacionRepository;
 import org.blackducks.repository.ResultadoRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import com.google.cloud.firestore.WriteBatch;
+import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -16,10 +20,13 @@ public class EvaluacionService {
 
     private final EvaluacionRepository evaluacionRepository;
     private final ResultadoRepository resultadoRepository;
+    private final Firestore firestore;
 
-    public EvaluacionService(EvaluacionRepository evaluacionRepository, ResultadoRepository resultadoRepository) {
+
+    public EvaluacionService(EvaluacionRepository evaluacionRepository, ResultadoRepository resultadoRepository, Firestore firestore) {
         this.evaluacionRepository = evaluacionRepository;
         this.resultadoRepository = resultadoRepository;
+        this.firestore = firestore;
     }
 
 
@@ -124,6 +131,51 @@ public class EvaluacionService {
 
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException("Error al evaluar la evaluación", e);
+        }
+    }
+
+    public List<Evaluacion> obtenerPorEstado(String estado) {
+        try {
+            return evaluacionRepository.obtenerPorEstado(estado);
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException("Error al obtener evaluaciones con estado: " + estado, e);
+        }
+    }
+
+    public String actualizarCompleta(Evaluacion evaluacionActualizada) {
+        try {
+            // Reutilizamos el método de guardar, ya que Firestore .set() sobrescribe el documento
+            evaluacionRepository.guardarEvaluacion(evaluacionActualizada);
+            return "Evaluación actualizada correctamente en Firebase";
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException("Error al actualizar la evaluación completa", e);
+        }
+    }
+
+    public String eliminarEvaluacionYResultados(String evaluacionId) {
+        try {
+            // 1. Iniciamos el Batch
+            WriteBatch batch = evaluacionRepository.getFirestore().batch();
+
+            // 2. Encolar la eliminación de la Evaluación (Reactivo)
+            batch.delete(evaluacionRepository.getFirestore().collection("evaluaciones").document(evaluacionId));
+
+            // 3. Buscar y encolar la eliminación de todos los RESULTADOS que tengan este evaluacionId
+            QuerySnapshot resultadosQuery = evaluacionRepository.getFirestore().collection("resultados")
+                    .whereEqualTo("evaluacionId", evaluacionId)
+                    .get().get();
+
+            for (QueryDocumentSnapshot doc : resultadosQuery.getDocuments()) {
+                batch.delete(doc.getReference());
+            }
+
+            // 4. Ejecutar el Batch atómico
+            batch.commit().get();
+
+            return "Evaluación y " + resultadosQuery.size() + " resultados históricos eliminados correctamente.";
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al realizar la eliminación en cascada del reactivo: " + e.getMessage());
         }
     }
 }

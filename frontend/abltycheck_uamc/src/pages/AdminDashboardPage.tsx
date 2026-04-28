@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Sidebar } from "../components/layout/sidebar";
-import { Search, Users, FileText, Clock, TrendingUp, Award } from "lucide-react";
+import { Search, Users, FileText, Clock, TrendingUp, Award, Trash2 } from "lucide-react"; // Importamos Trash2
 import { motion } from "framer-motion";
 import api from "../config/axiosConfig";
 
@@ -36,7 +36,6 @@ export function AdminPanel() {
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        // Ejecutamos ambas peticiones al mismo tiempo para mayor velocidad
         const [estudiantesRes, statsRes] = await Promise.all([
           api.get('/admin/estudiantes'),
           api.get('/admin/estadisticas')
@@ -53,6 +52,30 @@ export function AdminPanel() {
 
     fetchAdminData();
   }, []);
+
+  // Función para eliminar un estudiante
+  const handleDeleteStudent = async (matricula: string, nombre: string) => {
+    // 1. Confirmación de seguridad
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar permanentemente al usuario ${nombre || matricula} y todo su historial?`)) {
+      return;
+    }
+
+    try {
+      // 2. Petición al nuevo endpoint DELETE de tu AdminController
+      await api.delete(`/admin/estudiantes/${matricula}`);
+
+      // 3. Actualizamos la tabla localmente filtrando al usuario eliminado
+      setEstudiantes(prev => prev.filter(student => student.matricula !== matricula));
+
+      // 4. (Opcional) Actualizamos las estadísticas locales para que coincidan
+      setStats(prev => ({ ...prev, usuariosActivos: prev.usuariosActivos - 1 }));
+
+      alert("Estudiante eliminado exitosamente.");
+    } catch (error) {
+      console.error("Error al eliminar estudiante:", error);
+      alert("Hubo un error al intentar eliminar el estudiante.");
+    }
+  };
 
   const filteredStudents = estudiantes.filter(
       (s) =>
@@ -85,8 +108,9 @@ export function AdminPanel() {
               </p>
             </div>
 
-            {/* 1. SECCIÓN DE MÉTRICAS (Datos Reales) */}
+            {/* 1. SECCIÓN DE MÉTRICAS */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {/* ... (Las métricas se quedan igual) ... */}
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
                 <div className="w-14 h-14 bg-[#F28224]/10 rounded-2xl flex items-center justify-center flex-shrink-0">
                   <Users className="w-7 h-7 text-[#F28224]" />
@@ -156,6 +180,7 @@ export function AdminPanel() {
                     <th className="text-left px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Correo Electrónico</th>
                     <th className="text-center px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Prácticas Resueltas</th>
                     <th className="text-left px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Efectividad Global</th>
+                    <th className="text-center px-6 py-4 text-xs font-bold text-[#64748B] uppercase tracking-wider">Acciones</th> {/* Nueva columna */}
                   </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
@@ -165,17 +190,15 @@ export function AdminPanel() {
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-[#F28224]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                                  {/* CORRECCIÓN: Fallback para el avatar */}
                                   <span className="text-[#F28224] font-bold">{(student.nombre || "U").charAt(0).toUpperCase()}</span>
                                 </div>
-                                {/* CORRECCIÓN: Fallback para el nombre completo */}
                                 <span className="text-[#1D1D1B] font-medium whitespace-nowrap">{student.nombre || "Usuario Anónimo"}</span>
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                          <span className="text-sm text-[#64748B] font-mono bg-white border border-gray-200 px-2.5 py-1 rounded-lg">
-                            {student.matricula || "Sin matrícula"}
-                          </span>
+                              <span className="text-sm text-[#64748B] font-mono bg-white border border-gray-200 px-2.5 py-1 rounded-lg">
+                                {student.matricula || "Sin matrícula"}
+                              </span>
                             </td>
                             <td className="px-6 py-4 text-sm text-[#64748B]">
                               {student.email || "---"}
@@ -191,15 +214,26 @@ export function AdminPanel() {
                                       style={{ width: `${student.precision || 0}%` }}
                                   />
                                 </div>
-                                {/* CORRECCIÓN: Fallback para el toFixed */}
                                 <span className="text-sm font-bold text-[#64748B] w-10">{(student.precision || 0).toFixed(0)}%</span>
                               </div>
                             </td>
+
+                            {/* Celda de Acciones (Eliminar) */}
+                            <td className="px-6 py-4 text-center">
+                              <button
+                                  onClick={() => handleDeleteStudent(student.matricula, student.nombre)}
+                                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                  title="Eliminar estudiante"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </button>
+                            </td>
+
                           </tr>
                       ))
                   ) : (
                       <tr>
-                        <td colSpan={5} className="px-6 py-12 text-center text-[#64748B]">
+                        <td colSpan={6} className="px-6 py-12 text-center text-[#64748B]">
                           No se encontraron estudiantes.
                         </td>
                       </tr>

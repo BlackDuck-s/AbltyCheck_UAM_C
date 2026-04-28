@@ -3,8 +3,7 @@ import { Construction } from "lucide-react";
 import { useLocation } from "react-router-dom"; // 👈 Corregido a react-router-dom
 
 const titles: Record<string, string> = {
-    "/materials": "Material de Estudio",
-    "/settings": "Configuración", // Lo agregué por si también dejas pendiente la configuración por ahora
+    "/materiales": "Material de Estudio",
 };
 
 export function ComingSoonPage() {

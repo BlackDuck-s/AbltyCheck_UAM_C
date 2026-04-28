@@ -6,6 +6,8 @@ import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import org.blackducks.entity.Usuario;
 import org.springframework.stereotype.Repository;
+import com.google.cloud.firestore.WriteBatch;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,4 +63,51 @@ public class UsuarioRepository {
         }
         return usuarios;
     }
+
+    public String eliminarUsuarioYDependencias(String matricula) {
+        try {
+            // 1. Iniciamos el Batch (Transacción atómica)
+            WriteBatch batch = firestore.batch();
+
+            // 2. Buscar y encolar la eliminación del Usuario
+            QuerySnapshot usuarioQuery = firestore.collection("usuarios")
+                    .whereEqualTo("matricula", matricula)
+                    .get().get();
+
+            if (usuarioQuery.isEmpty()) {
+                return "Usuario no encontrado";
+            }
+
+            String usuarioId = usuarioQuery.getDocuments().get(0).getId();
+            batch.delete(firestore.collection("usuarios").document(usuarioId));
+
+            // 3. Buscar y encolar la eliminación de su Historial (Resultados)
+            QuerySnapshot resultadosQuery = firestore.collection("resultados")
+                    .whereEqualTo("usuarioId", matricula) // Asegúrate de que este campo se llama así en tu BD
+                    .get().get();
+
+            for (QueryDocumentSnapshot doc : resultadosQuery.getDocuments()) {
+                batch.delete(doc.getReference());
+            }
+
+            // 4. (Opcional) Si quieres borrar las propuestas de Crowdsourcing que hizo y siguen pendientes
+            QuerySnapshot crowdsourcingQuery = firestore.collection("evaluaciones")
+                    .whereEqualTo("autorId", matricula)
+                    .whereEqualTo("estado", "PENDIENTE")
+                    .get().get();
+
+            for (QueryDocumentSnapshot doc : crowdsourcingQuery.getDocuments()) {
+                batch.delete(doc.getReference());
+            }
+
+            // 5. Ejecutar el Batch (Todo se borra al mismo tiempo)
+            batch.commit().get();
+
+            return "Usuario " + matricula + " y todo su historial han sido eliminados correctamente.";
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al realizar la eliminación en cascada: " + e.getMessage());
+        }
+    }
+
 }

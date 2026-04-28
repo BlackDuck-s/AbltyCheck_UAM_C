@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import { AuthPage } from "./pages/AuthPage"; // Ajusta la ruta de importación
+import { AuthPage } from "./pages/AuthPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ProgressPage } from "./pages/ProgressPage";
 import { PracticePage } from "./pages/PracticarPage";
@@ -9,6 +9,8 @@ import {SettingsPage} from "./pages/ConfiguracionPage.tsx";
 import {AdminPanel} from "./pages/AdminDashboardPage.tsx";
 import { AdminCrowdsourcingPage } from "./pages/AdminCrowdsourcingPage";
 import { AdminStatsPage } from "./pages/AdminStatsPage";
+import {AdminReactivosPage} from "./pages/AdminReactivoPage.tsx";
+import { AdminSubirMaterialPage } from "./pages/AdminSubirMaterialPage";
 
 function App() {
     return (
@@ -27,9 +29,11 @@ function App() {
             <Route path="/admin" element={<AdminPanel/>} />
             <Route path="/admin/crowdsourcing" element={<AdminCrowdsourcingPage />} />
             <Route path="/admin/stats" element={<AdminStatsPage />} />
+            <Route path="/admin/reactivos" element={<AdminReactivosPage />} />
+            <Route path="/admin/materiales" element={<AdminSubirMaterialPage />} />
 
             {/* Vistas en Construcción */}
-            <Route path="/materials" element={<ComingSoonPage />} />
+            <Route path="/materiales" element={<ComingSoonPage />} />
         </Routes>
     );
 }

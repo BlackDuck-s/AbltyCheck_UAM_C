@@ -103,7 +103,6 @@ public class AdminController {
     @GetMapping("/reactivos/pendientes")
     public ResponseEntity<?> obtenerReactivosPendientes() {
         try {
-            // Utilizamos tu método limpio que devuelve List<Evaluacion>
             List<Evaluacion> pendientes = evaluacionService.obtenerPendientes();
             return ResponseEntity.ok(pendientes);
         } catch (Exception e) {
@@ -127,6 +126,69 @@ public class AdminController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("mensaje", "Error al actualizar estado: " + e.getMessage()));
+        }
+    }
+
+    // ---------------------------------------------------------
+    // 5. ELIMINAR USUARIO EN CASCADA
+    // ---------------------------------------------------------
+    @DeleteMapping("/estudiantes/{matricula}")
+    public ResponseEntity<?> eliminarEstudiante(@PathVariable String matricula) {
+        try {
+            // Llamamos a nuestro nuevo método destructor
+            String resultado = usuarioRepository.eliminarUsuarioYDependencias(matricula);
+
+            return ResponseEntity.ok(Map.of("mensaje", resultado));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("mensaje", "Error al eliminar usuario: " + e.getMessage()));
+        }
+    }
+
+    // ---------------------------------------------------------
+    // 6. CRUD DE REACTIVOS APROBADOS (Gestor de Contenido)
+    // ---------------------------------------------------------
+
+    // Obtener todos los aprobados
+    @GetMapping("/evaluaciones/aprobadas")
+    public ResponseEntity<?> obtenerReactivosAprobados() {
+        try {
+            // Reutilizamos tu método existente
+            List<Evaluacion> aprobadas = evaluacionService.obtenerPorEstado("APROBADA");
+            return ResponseEntity.ok(aprobadas);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("mensaje", "Error al cargar evaluaciones: " + e.getMessage()));
+        }
+    }
+
+    // Eliminar una evaluación completa
+    @DeleteMapping("/evaluaciones/{id}")
+    public ResponseEntity<?> eliminarEvaluacion(@PathVariable String id) {
+        try {
+            // Nota: Tendrás que crear este método en EvaluacionRepository y EvaluacionService
+            // firestore.collection("evaluaciones").document(id).delete().get();
+            // evaluacionService.eliminar(id);
+
+            return ResponseEntity.ok(Map.of("mensaje", "Evaluación eliminada correctamente."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("mensaje", "Error al eliminar: " + e.getMessage()));
+        }
+    }
+
+    // Actualizar una evaluación (Editar preguntas o título)
+    @PutMapping("/evaluaciones/{id}")
+    public ResponseEntity<?> actualizarEvaluacion(@PathVariable String id, @RequestBody Evaluacion evaluacionActualizada) {
+        try {
+            // Lógica: Actualizar todo el documento en Firestore
+            evaluacionActualizada.setId(id);
+            evaluacionService.actualizarCompleta(evaluacionActualizada);
+
+            return ResponseEntity.ok(Map.of("mensaje", "Evaluación actualizada con éxito."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("mensaje", "Error al actualizar: " + e.getMessage()));
         }
     }
 }

@@ -73,14 +73,15 @@ export function Sidebar({ isAdmin = false }: SidebarProps) {
             { to: "/admin", icon: Shield, label: "Panel Admin" },
             { to: "/admin/crowdsourcing", icon: Users, label: "Aprobar Reactivos", badge: "Pendientes" },
             { to: "/admin/stats", icon: BarChart3, label: "Estadísticas" },
-            { to: "/admin/materials", icon: BookOpen, label: "Subir Material" },
+            { to: "/admin/materiales", icon: BookOpen, label: "Subir Material" },
+            { to: "/admin/reactivos", icon: BookOpen, label: "Gestor de Reactivos" }
         ]
         : [
             { to: "/profile", icon: User, label: "Perfil" },
             { to: "/progress", icon: BarChart3, label: "Progreso" },
             { to: "/questions", icon: BookOpen, label: "Practicar" },
             { to: "/crowdsourcing", icon: Users, label: "Crowdsourcing" },
-            { to: "/materials", icon: FileText, label: "Material de Estudio", badge: "Nuevo" },
+            { to: "/materiales", icon: FileText, label: "Material de Estudio", badge: "Nuevo" },
         ];
 
     const bottomLinks: NavItem[] = [

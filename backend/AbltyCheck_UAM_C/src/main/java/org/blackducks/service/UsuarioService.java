@@ -9,6 +9,8 @@ import org.blackducks.entity.Usuario;
 import org.blackducks.repository.ResultadoRepository;
 import org.blackducks.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
+import com.google.cloud.firestore.WriteBatch;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,5 +73,6 @@ public class UsuarioService {
         perfilDTO.setRadarSkills(radar);
         return perfilDTO;
     }
+
 
 }
